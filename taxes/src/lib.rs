@@ -48,7 +48,7 @@ mod tests {
         let regime = TaxRegime::new(vec![lowest,middle,highest]);
 
         let over_highest_tax = calculate_tax(25000.0, regime.clone());
-        assert_eq!(over_highest_tax, 4500.0);
+        assert_eq!(over_highest_tax, 6500.0);
 
         let middle_tax = calculate_tax(15000.0, regime.clone());
         assert_eq!(middle_tax, 2000.0);
