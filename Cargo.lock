@@ -5,5 +5,9 @@ name = "finsim"
 version = "0.1.0"
 
 [[package]]
+name = "registered_accounts"
+version = "0.1.0"
+
+[[package]]
 name = "taxes"
 version = "0.1.0"

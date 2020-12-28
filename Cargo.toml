@@ -2,4 +2,5 @@
 members = [
     "taxes",
     "finsim",
+    "registered_accounts",
 ]
