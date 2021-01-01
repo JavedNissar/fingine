@@ -7,3 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+maplit = "1.0.2"
+rusty-money = "0.3.6"
+rust_decimal = "1.9.0"
