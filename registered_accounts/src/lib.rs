@@ -1,4 +1,4 @@
 enum RegisteredAccountType {
     TFSA,
-    RRSP
+    RRSP,
 }
