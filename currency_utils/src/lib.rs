@@ -40,7 +40,7 @@ fn convert<'a, T: FormattableCurrency>(exchange: &Exchange<'a, T>, money: &Money
 }
 
 pub trait CurrencyIndependentClamp<'a, T: FormattableCurrency> {
-    fn clamp(&self, min_money: &Money<'a, T>, max_money: &Money<'a, T>, exchange: &Exchange<'a, T>) -> Result<Money<'a, T>, ErrorCode>;
+    fn currency_independent_clamp(&self, min_money: &Money<'a, T>, max_money: &Money<'a, T>, exchange: &Exchange<'a, T>) -> Result<Money<'a, T>, ErrorCode>;
 }
 
 pub trait CurrencyIndependentComparison<'a, T: FormattableCurrency> {
@@ -52,7 +52,7 @@ pub trait CurrencyIndependentComparison<'a, T: FormattableCurrency> {
 }
 
 pub trait CurrencyIndependentAdd<'a, T: FormattableCurrency> {
-    fn add(
+    fn currency_independent_add(
         &self,
         other: &Money<'a, T>,
         output_currency: &T,
@@ -61,7 +61,7 @@ pub trait CurrencyIndependentAdd<'a, T: FormattableCurrency> {
 }
 
 pub trait CurrencyIndependentSub<'a, T: FormattableCurrency> {
-    fn sub(
+    fn currency_independent_sub(
         &self,
         other: &Money<'a, T>,
         output_currency: &T,
@@ -122,7 +122,7 @@ fn determine_relative_position_of_money_relative_to_range<'a, T:FormattableCurre
 }
 
 impl<'a, T: FormattableCurrency> CurrencyIndependentClamp<'a, T> for Money<'a, T>{
-    fn clamp(&self, min_money: &Money<'a, T>, max_money: &Money<'a, T>, exchange: &Exchange<'a, T>) -> Result<Money<'a, T>, ErrorCode> {
+    fn currency_independent_clamp(&self, min_money: &Money<'a, T>, max_money: &Money<'a, T>, exchange: &Exchange<'a, T>) -> Result<Money<'a, T>, ErrorCode> {
         let relative_to_range = determine_relative_position_of_money_relative_to_range(self, min_money, max_money, exchange)?;
         match relative_to_range {
             PositionRelativeToRange::BeforeRange => convert(exchange, &min_money, self.currency()),
@@ -133,7 +133,7 @@ impl<'a, T: FormattableCurrency> CurrencyIndependentClamp<'a, T> for Money<'a, T
 }
 
 impl<'a, T: FormattableCurrency> CurrencyIndependentAdd<'a, T> for Money<'a, T>{
-    fn add(&self, other: &Money<'a, T>, output_currency: &T, exchange: &Exchange<'a, T>) -> Result<Money<'a, T>, ErrorCode> {
+    fn currency_independent_add(&self, other: &Money<'a, T>, output_currency: &T, exchange: &Exchange<'a, T>) -> Result<Money<'a, T>, ErrorCode> {
         let converted_self = convert(exchange, &self, output_currency)?;
         let converted_other = convert(exchange, &other, output_currency)?;
         
@@ -142,7 +142,7 @@ impl<'a, T: FormattableCurrency> CurrencyIndependentAdd<'a, T> for Money<'a, T>{
 }
 
 impl<'a, T: FormattableCurrency> CurrencyIndependentSub<'a, T> for Money<'a, T>{
-    fn sub(&self, other: &Money<'a, T>, output_currency: &T, exchange: &Exchange<'a, T>) -> Result<Money<'a, T>, ErrorCode> {
+    fn currency_independent_sub(&self, other: &Money<'a, T>, output_currency: &T, exchange: &Exchange<'a, T>) -> Result<Money<'a, T>, ErrorCode> {
         let converted_self = convert(exchange, &self, output_currency)?;
         let converted_other = convert(exchange,&other, output_currency)?;
 
@@ -174,6 +174,15 @@ mod tests {
                 minor_units: 1,
                 name: "British Pound",
                 symbol: "£",
+                symbol_first: true,
+            },
+            EUR : {
+                code: "EUR",
+                exponent: 2,
+                locale: EnEu,
+                minor_units: 1,
+                name: "Euro",
+                symbol: "€",
                 symbol_first: true,
             }
         }
@@ -259,36 +268,163 @@ mod tests {
 
     #[test]
     fn can_clamp_with_value_less_than_range(){
+        let usd = test::find("USD").unwrap();
+        let gbp = test::find("GBP").unwrap();
+        let eur = test::find("EUR").unwrap();
 
+        let usd_gbp_rate = ExchangeRate::new(usd, gbp, dec!(0.7)).unwrap();
+        let usd_eur_rate = ExchangeRate::new(usd, eur, dec!(0.8)).unwrap();
+
+        let mut exchange = Exchange::new();
+        exchange.set_rate(&usd_gbp_rate);
+        exchange.set_rate(&usd_eur_rate);
+
+        let usd_amount = Money::from_minor(8_00, test::USD);
+        let min_in_gbp = Money::from_minor(6_00, test::GBP);
+        let max_in_eur = Money::from_minor(9_00, test::EUR);
+
+        let clamped = usd_amount.currency_independent_clamp(&min_in_gbp, &max_in_eur, &exchange);
+        assert_eq!(clamped.unwrap(), min_in_gbp);
     }
 
     #[test]
     fn can_clamp_with_value_within_range(){
+        let usd = test::find("USD").unwrap();
+        let gbp = test::find("GBP").unwrap();
+        let eur = test::find("EUR").unwrap();
+
+        let usd_gbp_rate = ExchangeRate::new(usd, gbp, dec!(0.7)).unwrap();
+        let usd_eur_rate = ExchangeRate::new(usd, eur, dec!(0.8)).unwrap();
+
+        let mut exchange = Exchange::new();
+        exchange.set_rate(&usd_gbp_rate);
+        exchange.set_rate(&usd_eur_rate);
+
+        let usd_amount = Money::from_minor(9_00, test::USD);
+        let min_in_gbp = Money::from_minor(6_00, test::GBP);
+        let max_in_eur = Money::from_minor(9_00, test::EUR);
+
+        let clamped = usd_amount.currency_independent_clamp(&min_in_gbp, &max_in_eur, &exchange);
+        let expected_usd_amount = Money::from_minor(8_57, test::USD);
+        assert_eq!(clamped.unwrap(), expected_usd_amount);
 
     }
 
     #[test]
     fn can_clamp_with_value_greater_than_range(){
+        let usd = test::find("USD").unwrap();
+        let gbp = test::find("GBP").unwrap();
+        let eur = test::find("EUR").unwrap();
 
+        let usd_gbp_rate = ExchangeRate::new(usd, gbp, dec!(0.7)).unwrap();
+        let usd_eur_rate = ExchangeRate::new(usd, eur, dec!(0.8)).unwrap();
+
+        let mut exchange = Exchange::new();
+        exchange.set_rate(&usd_gbp_rate);
+        exchange.set_rate(&usd_eur_rate);
+
+        let usd_amount = Money::from_minor(12_00, test::USD);
+        let min_in_gbp = Money::from_minor(6_00, test::GBP);
+        let max_in_eur = Money::from_minor(9_00, test::EUR);
+
+        let clamped = usd_amount.currency_independent_clamp(&min_in_gbp, &max_in_eur, &exchange);
+        let expected_usd_amount = Money::from_minor(11_25, test::USD);
+        assert_eq!(clamped.unwrap(), expected_usd_amount);
     }
 
     #[test]
     fn can_add_different_currencies_and_get_converted_result(){
+        let usd = test::find("USD").unwrap();
+        let gbp = test::find("GBP").unwrap();
+        let eur = test::find("EUR").unwrap();
 
+        let usd_gbp_rate = ExchangeRate::new(usd, gbp, dec!(0.7)).unwrap();
+        let usd_eur_rate = ExchangeRate::new(usd, eur, dec!(0.8)).unwrap();
+
+        let mut exchange = Exchange::new();
+        exchange.set_rate(&usd_gbp_rate);
+        exchange.set_rate(&usd_eur_rate);
+
+        let gbp_amount = Money::from_minor(10_00, test::GBP);
+        let eur_amount = Money::from_minor(10_00, test::EUR);
+        let summed_usd_amount = Money::from_minor(26_79, test::USD);
+
+        let sum_of_different_currencies = gbp_amount.currency_independent_add(
+            &eur_amount, 
+            test::USD, 
+            &exchange);
+        assert_eq!(sum_of_different_currencies.unwrap(), summed_usd_amount);
     }
 
     #[test]
     fn can_add_same_currencies_and_get_converted_result(){
+        let usd = test::find("USD").unwrap();
+        let gbp = test::find("GBP").unwrap();
+        let eur = test::find("EUR").unwrap();
 
+        let usd_gbp_rate = ExchangeRate::new(usd, gbp, dec!(0.7)).unwrap();
+        let usd_eur_rate = ExchangeRate::new(usd, eur, dec!(0.8)).unwrap();
+
+        let mut exchange = Exchange::new();
+        exchange.set_rate(&usd_gbp_rate);
+        exchange.set_rate(&usd_eur_rate);
+
+        let first_gbp_amount = Money::from_minor(10_00, test::GBP);
+        let second_gbp_amount= Money::from_minor(10_00, test::EUR);
+        let summed_usd_amount = Money::from_minor(26_79, test::USD);
+
+        let sum_of_different_currencies = first_gbp_amount.currency_independent_add(
+            &second_gbp_amount, 
+            test::USD, 
+            &exchange);
+        assert_eq!(sum_of_different_currencies.unwrap(), summed_usd_amount);
     }
 
     #[test]
     fn can_subtract_different_currencies_and_get_converted_result(){
+        let usd = test::find("USD").unwrap();
+        let gbp = test::find("GBP").unwrap();
+        let eur = test::find("EUR").unwrap();
 
+        let usd_gbp_rate = ExchangeRate::new(usd, gbp, dec!(0.7)).unwrap();
+        let usd_eur_rate = ExchangeRate::new(usd, eur, dec!(0.8)).unwrap();
+
+        let mut exchange = Exchange::new();
+        exchange.set_rate(&usd_gbp_rate);
+        exchange.set_rate(&usd_eur_rate);
+
+        let gbp_amount = Money::from_minor(10_00, test::GBP);
+        let eur_amount = Money::from_minor(10_00, test::EUR);
+        let usd_amount = Money::from_minor(1_79, test::USD);
+
+        let difference = gbp_amount.currency_independent_sub(
+            &eur_amount, 
+            test::USD, 
+            &exchange);
+        assert_eq!(difference.unwrap(), usd_amount);
     }
 
     #[test]
     fn can_subtract_same_currencies_and_get_converted_result(){
+        let usd = test::find("USD").unwrap();
+        let gbp = test::find("GBP").unwrap();
+        let eur = test::find("EUR").unwrap();
 
+        let usd_gbp_rate = ExchangeRate::new(usd, gbp, dec!(0.7)).unwrap();
+        let usd_eur_rate = ExchangeRate::new(usd, eur, dec!(0.8)).unwrap();
+
+        let mut exchange = Exchange::new();
+        exchange.set_rate(&usd_gbp_rate);
+        exchange.set_rate(&usd_eur_rate);
+
+        let first_gbp_amount = Money::from_minor(10_00, test::GBP);
+        let second_gbp_amount= Money::from_minor(9_00, test::GBP);
+        let usd_amount = Money::from_minor(0_70, test::USD);
+
+        let difference= first_gbp_amount.currency_independent_sub(
+            &second_gbp_amount, 
+            test::USD, 
+            &exchange);
+        assert_eq!(difference.unwrap(), usd_amount);
     }
 }
