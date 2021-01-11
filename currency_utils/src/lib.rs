@@ -256,4 +256,39 @@ mod tests {
         assert_eq!(gbp_amount.currency_independent_gte(&usd_amount, &exchange).unwrap(), false);
         assert_eq!(gbp_amount.currency_independent_eq(&usd_amount, &exchange).unwrap(), true);
     }
+
+    #[test]
+    fn can_clamp_with_value_less_than_range(){
+
+    }
+
+    #[test]
+    fn can_clamp_with_value_within_range(){
+
+    }
+
+    #[test]
+    fn can_clamp_with_value_greater_than_range(){
+
+    }
+
+    #[test]
+    fn can_add_different_currencies_and_get_converted_result(){
+
+    }
+
+    #[test]
+    fn can_add_same_currencies_and_get_converted_result(){
+
+    }
+
+    #[test]
+    fn can_subtract_different_currencies_and_get_converted_result(){
+
+    }
+
+    #[test]
+    fn can_subtract_same_currencies_and_get_converted_result(){
+
+    }
 }
