@@ -102,8 +102,7 @@ dependencies = [
 [[package]]
 name = "rusty-money"
 version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "656d19759d908f02044b86ec7a84efd0324390728068795377e68f22f127f2da"
+source = "git+https://github.com/RestitutorOrbis/rusty_money?branch=javed.add-lifetime-to-get-rate-return-type#d6e6c5f75ec9545b61aed4275217a896d925ca32"
 dependencies = [
  "rust_decimal",
  "rust_decimal_macros",

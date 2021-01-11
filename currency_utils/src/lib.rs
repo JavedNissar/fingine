@@ -1,4 +1,4 @@
-use anyhow::{Error, Result};
+use anyhow::Result;
 use rusty_money::{FormattableCurrency, Exchange, Money, MoneyError};
 use thiserror::Error;
 
@@ -17,8 +17,8 @@ pub enum ErrorCode {
 }
 
 impl From<MoneyError> for ErrorCode {
-    fn from(moneyError: MoneyError) -> Self {
-        match moneyError {
+    fn from(money_error: MoneyError) -> Self {
+        match money_error {
             MoneyError::InvalidAmount => ErrorCode::InvalidAmount,
             // Whenever we have an invalid currency, that's usually because an arithmetic operation on money involved multiple currencies
             MoneyError::InvalidCurrency => ErrorCode::CouldNotMatchCurrencies,
@@ -27,8 +27,7 @@ impl From<MoneyError> for ErrorCode {
     }
 }
 
-
-fn convert<'a, T: FormattableCurrency>(exchange: &'a Exchange<'a, T>, money: &Money<'a, T>, currency: &T) -> Result<Money<'a, T>, ErrorCode> {
+fn convert<'a, T: FormattableCurrency>(exchange: &Exchange<'a, T>, money: &Money<'a, T>, currency: &T) -> Result<Money<'a, T>, ErrorCode> {
     let exchange_rate_pair = exchange.get_rate(money.currency(), currency);
 
     if let Some(exchange_rate_pair) = exchange_rate_pair {
