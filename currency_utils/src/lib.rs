@@ -1,5 +1,6 @@
 use anyhow::Result;
-use rusty_money::{FormattableCurrency, Exchange, Money, MoneyError};
+use rusty_money::{FormattableCurrency, Exchange, Money, MoneyError, ExchangeRate};
+use rust_decimal::*;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -146,5 +147,113 @@ impl<'a, T: FormattableCurrency> CurrencyIndependentSub<'a, T> for Money<'a, T>{
         let converted_other = convert(exchange,&other, output_currency)?;
 
         Ok(converted_self - converted_other)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rusty_money::define_currency_set;
+    use rust_decimal_macros::*;
+
+    define_currency_set!(
+        test {
+            USD: {
+                code: "USD",
+                exponent: 2,
+                locale: EnUs,
+                minor_units: 100,
+                name: "USD",
+                symbol: "$",
+                symbol_first: true,
+            },
+            GBP : {
+                code: "GBP",
+                exponent: 2,
+                locale: EnUs,
+                minor_units: 1,
+                name: "British Pound",
+                symbol: "£",
+                symbol_first: true,
+            }
+        }
+    );
+
+    #[test]
+    fn can_compare_usd_amount_with_greater_gbp_amount(){
+        let usd = test::find("USD").unwrap();
+        let gbp = test::find("GBP").unwrap();
+
+        let usd_gbp_rate = ExchangeRate::new(usd, gbp, dec!(0.7)).unwrap();
+        let mut exchange = Exchange::new(); 
+
+        exchange.set_rate(&usd_gbp_rate);
+        
+        let usd_amount = Money::from_minor(2_00, test::USD);
+        let gbp_amount = Money::from_minor(3_00, test::GBP);
+
+        assert_eq!(usd_amount.currency_independent_lt(&gbp_amount, &exchange).unwrap(), true);
+        assert_eq!(usd_amount.currency_independent_lte(&gbp_amount, &exchange).unwrap(), true);
+        assert_eq!(usd_amount.currency_independent_gt(&gbp_amount, &exchange).unwrap(), false);
+        assert_eq!(usd_amount.currency_independent_gte(&gbp_amount, &exchange).unwrap(), false);
+        assert_eq!(usd_amount.currency_independent_eq(&gbp_amount, &exchange).unwrap(), false);
+
+        assert_eq!(gbp_amount.currency_independent_lt(&usd_amount, &exchange).unwrap(), false);
+        assert_eq!(gbp_amount.currency_independent_lte(&usd_amount, &exchange).unwrap(), false);
+        assert_eq!(gbp_amount.currency_independent_gt(&usd_amount, &exchange).unwrap(), true);
+        assert_eq!(gbp_amount.currency_independent_gte(&usd_amount, &exchange).unwrap(), true);
+        assert_eq!(gbp_amount.currency_independent_eq(&usd_amount, &exchange).unwrap(), false);
+    }
+
+    #[test]
+    fn can_compare_usd_amount_with_lesser_gbp_amount(){
+        let usd = test::find("USD").unwrap();
+        let gbp = test::find("GBP").unwrap();
+
+        let usd_gbp_rate = ExchangeRate::new(usd, gbp, dec!(0.7)).unwrap();
+        let mut exchange = Exchange::new(); 
+
+        exchange.set_rate(&usd_gbp_rate);
+        
+        let usd_amount = Money::from_minor(5_00, test::USD);
+        let gbp_amount = Money::from_minor(1_00, test::GBP);
+
+        assert_eq!(usd_amount.currency_independent_lt(&gbp_amount, &exchange).unwrap(), false);
+        assert_eq!(usd_amount.currency_independent_lte(&gbp_amount, &exchange).unwrap(), false);
+        assert_eq!(usd_amount.currency_independent_gt(&gbp_amount, &exchange).unwrap(), true);
+        assert_eq!(usd_amount.currency_independent_gte(&gbp_amount, &exchange).unwrap(), true);
+        assert_eq!(usd_amount.currency_independent_eq(&gbp_amount, &exchange).unwrap(), false);
+
+        assert_eq!(gbp_amount.currency_independent_lt(&usd_amount, &exchange).unwrap(), true);
+        assert_eq!(gbp_amount.currency_independent_lte(&usd_amount, &exchange).unwrap(), true);
+        assert_eq!(gbp_amount.currency_independent_gt(&usd_amount, &exchange).unwrap(), false);
+        assert_eq!(gbp_amount.currency_independent_gte(&usd_amount, &exchange).unwrap(), false);
+        assert_eq!(gbp_amount.currency_independent_eq(&usd_amount, &exchange).unwrap(), false);
+    }
+
+    #[test]
+    fn can_compare_usd_amount_with_equal_gbp_amount(){
+        let usd = test::find("USD").unwrap();
+        let gbp = test::find("GBP").unwrap();
+
+        let usd_gbp_rate = ExchangeRate::new(usd, gbp, dec!(0.7)).unwrap();
+        let mut exchange = Exchange::new(); 
+
+        exchange.set_rate(&usd_gbp_rate);
+        
+        let usd_amount = Money::from_minor(10_00, test::USD);
+        let gbp_amount = Money::from_minor(7_00, test::GBP);
+
+        assert_eq!(usd_amount.currency_independent_lt(&gbp_amount, &exchange).unwrap(), false);
+        assert_eq!(usd_amount.currency_independent_lte(&gbp_amount, &exchange).unwrap(), false);
+        assert_eq!(usd_amount.currency_independent_gt(&gbp_amount, &exchange).unwrap(), false);
+        assert_eq!(usd_amount.currency_independent_gte(&gbp_amount, &exchange).unwrap(), false);
+        assert_eq!(usd_amount.currency_independent_eq(&gbp_amount, &exchange).unwrap(), true);
+
+        assert_eq!(gbp_amount.currency_independent_lt(&usd_amount, &exchange).unwrap(), false);
+        assert_eq!(gbp_amount.currency_independent_lte(&usd_amount, &exchange).unwrap(), false);
+        assert_eq!(gbp_amount.currency_independent_gt(&usd_amount, &exchange).unwrap(), false);
+        assert_eq!(gbp_amount.currency_independent_gte(&usd_amount, &exchange).unwrap(), false);
+        assert_eq!(gbp_amount.currency_independent_eq(&usd_amount, &exchange).unwrap(), true);
     }
 }

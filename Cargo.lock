@@ -17,6 +17,8 @@ name = "currency_utils"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "rust_decimal",
+ "rust_decimal_macros",
  "rusty-money 0.4.0",
  "thiserror",
 ]
