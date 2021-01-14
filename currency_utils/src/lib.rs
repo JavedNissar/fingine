@@ -194,9 +194,11 @@ mod tests {
         let gbp = test::find("GBP").unwrap();
 
         let usd_gbp_rate = ExchangeRate::new(usd, gbp, dec!(0.7)).unwrap();
+        let gbp_usd_rate = ExchangeRate::new(gbp, usd, dec!(1) / dec!(0.7)).unwrap();
         let mut exchange = Exchange::new(); 
 
         exchange.set_rate(&usd_gbp_rate);
+        exchange.set_rate(&gbp_usd_rate);
         
         let usd_amount = Money::from_minor(2_00, test::USD);
         let gbp_amount = Money::from_minor(3_00, test::GBP);
