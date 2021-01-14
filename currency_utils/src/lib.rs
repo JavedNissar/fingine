@@ -40,7 +40,7 @@ fn convert<'a, T: FormattableCurrency>(exchange: &Exchange<'a, T>, money: &Money
 }
 
 pub trait CurrencyIndependentClamp<'a, T: FormattableCurrency> {
-    fn currency_independent_clamp(&self, min_money: &Money<'a, T>, max_money: &Money<'a, T>, exchange: &Exchange<'a, T>) -> Result<Money<'a, T>, ErrorCode>;
+    fn currency_independent_clamp(&self, min_money: &Money<'a, T>, max_money: &Money<'a, T>, exchange: &Exchange<'a, T>, output_currency: &T) -> Result<Money<'a, T>, ErrorCode>;
 }
 
 pub trait CurrencyIndependentComparison<'a, T: FormattableCurrency> {
@@ -122,12 +122,12 @@ fn determine_relative_position_of_money_relative_to_range<'a, T:FormattableCurre
 }
 
 impl<'a, T: FormattableCurrency> CurrencyIndependentClamp<'a, T> for Money<'a, T>{
-    fn currency_independent_clamp(&self, min_money: &Money<'a, T>, max_money: &Money<'a, T>, exchange: &Exchange<'a, T>) -> Result<Money<'a, T>, ErrorCode> {
+    fn currency_independent_clamp(&self, min_money: &Money<'a, T>, max_money: &Money<'a, T>, exchange: &Exchange<'a, T>, output_currency: &T) -> Result<Money<'a, T>, ErrorCode> {
         let relative_to_range = determine_relative_position_of_money_relative_to_range(self, min_money, max_money, exchange)?;
         match relative_to_range {
-            PositionRelativeToRange::BeforeRange => convert(exchange, &min_money, self.currency()),
-            PositionRelativeToRange::WithinRange => Ok(self.clone()),
-            PositionRelativeToRange::AfterRange => convert(exchange, &max_money, self.currency()),
+            PositionRelativeToRange::BeforeRange => convert(exchange, &min_money, output_currency),
+            PositionRelativeToRange::WithinRange => convert(exchange, &self, output_currency),
+            PositionRelativeToRange::AfterRange => convert(exchange, &max_money, output_currency),
         }
     }
 }
@@ -283,7 +283,7 @@ mod tests {
         let min_in_gbp = Money::from_minor(6_00, test::GBP);
         let max_in_eur = Money::from_minor(9_00, test::EUR);
 
-        let clamped = usd_amount.currency_independent_clamp(&min_in_gbp, &max_in_eur, &exchange);
+        let clamped = usd_amount.currency_independent_clamp(&min_in_gbp, &max_in_eur, &exchange, test::USD);
         assert_eq!(clamped.unwrap(), min_in_gbp);
     }
 
@@ -304,7 +304,7 @@ mod tests {
         let min_in_gbp = Money::from_minor(6_00, test::GBP);
         let max_in_eur = Money::from_minor(9_00, test::EUR);
 
-        let clamped = usd_amount.currency_independent_clamp(&min_in_gbp, &max_in_eur, &exchange);
+        let clamped = usd_amount.currency_independent_clamp(&min_in_gbp, &max_in_eur, &exchange, test::USD);
         let expected_usd_amount = Money::from_minor(8_57, test::USD);
         assert_eq!(clamped.unwrap(), expected_usd_amount);
 
@@ -327,7 +327,7 @@ mod tests {
         let min_in_gbp = Money::from_minor(6_00, test::GBP);
         let max_in_eur = Money::from_minor(9_00, test::EUR);
 
-        let clamped = usd_amount.currency_independent_clamp(&min_in_gbp, &max_in_eur, &exchange);
+        let clamped = usd_amount.currency_independent_clamp(&min_in_gbp, &max_in_eur, &exchange, test::USD);
         let expected_usd_amount = Money::from_minor(11_25, test::USD);
         assert_eq!(clamped.unwrap(), expected_usd_amount);
     }
