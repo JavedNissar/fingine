@@ -104,7 +104,7 @@ dependencies = [
 [[package]]
 name = "rusty-money"
 version = "0.4.0"
-source = "git+https://github.com/RestitutorOrbis/rusty_money?branch=javed.add-lifetime-to-get-rate-return-type#d6e6c5f75ec9545b61aed4275217a896d925ca32"
+source = "git+https://github.com/RestitutorOrbis/rusty_money?branch=javed.account-for-reverse#f1fb5c887936f919a03db65653334cc32a18240a"
 dependencies = [
  "rust_decimal",
  "rust_decimal_macros",
