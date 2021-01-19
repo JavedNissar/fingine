@@ -4,6 +4,12 @@ use rust_decimal::*;
 use thiserror::Error;
 use rust_decimal_macros::*;
 
+macro_rules! assert_approx_eq {
+    ($lhs:expr, $rhs:expr, $eps: expr) => {
+        assert_eq!(approximately_equal($lhs, $rhs, $eps), true)
+    };
+}
+
 #[derive(Debug, Error)]
 pub enum ErrorCode {
     #[error("Could not find exchange rate")]
@@ -149,6 +155,10 @@ impl<'a, T: FormattableCurrency> CurrencyIndependentSub<'a, T> for Money<'a, T>{
 
         Ok(converted_self - converted_other)
     }
+}
+
+fn approximately_equal(orig: &Decimal, other: &Decimal, epsilon: &Decimal) -> bool{
+    (orig - other < *epsilon) || (other - orig < *epsilon)
 }
 
 #[cfg(test)]
@@ -359,7 +369,8 @@ mod tests {
             test::USD, 
             &exchange).unwrap();
 
-        assert_eq!(sum_of_different_currencies.amount(), summed_usd_amount.amount());
+        
+        assert_approx_eq!(sum_of_different_currencies.amount(), summed_usd_amount.amount(), &dec!(0.1));
     }
 
     #[test]
