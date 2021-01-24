@@ -55,6 +55,14 @@ fn convert<'a, T: FormattableCurrency>(exchange: &Exchange<'a, T>, money: &Money
     }
 }
 
+fn maybe_convert<'a, T: FormattableCurrency>(exchange: &Exchange<'a, T>, money: &Money<'a, T>, currency: &'a T) -> Result<Money<'a, T>, ErrorCode> {
+    if money.currency() != currency {
+        return convert(exchange, money, currency);
+    }else{
+        return Ok(money.clone());
+    }
+}
+
 pub trait CurrencyIndependentClamp<'a, T: FormattableCurrency> {
     fn currency_independent_clamp(&self, min_money: &Money<'a, T>, max_money: &Money<'a, T>, exchange: &Exchange<'a, T>, output_currency: &'a T) -> Result<Money<'a, T>, ErrorCode>;
 }
@@ -141,9 +149,9 @@ impl<'a, T: FormattableCurrency> CurrencyIndependentClamp<'a, T> for Money<'a, T
     fn currency_independent_clamp(&self, min_money: &Money<'a, T>, max_money: &Money<'a, T>, exchange: &Exchange<'a, T>, output_currency: &'a T) -> Result<Money<'a, T>, ErrorCode> {
         let relative_to_range = determine_relative_position_of_money_relative_to_range(self, min_money, max_money, exchange)?;
         match relative_to_range {
-            PositionRelativeToRange::BeforeRange => convert(exchange, &min_money, output_currency),
-            PositionRelativeToRange::WithinRange => convert(exchange, &self, output_currency),
-            PositionRelativeToRange::AfterRange => convert(exchange, &max_money, output_currency),
+            PositionRelativeToRange::BeforeRange => maybe_convert(exchange, &min_money, output_currency),
+            PositionRelativeToRange::WithinRange => maybe_convert(exchange, &self, output_currency),
+            PositionRelativeToRange::AfterRange => maybe_convert(exchange, &max_money, output_currency),
         }
     }
 }
@@ -309,8 +317,8 @@ mod tests {
         let usd_eur_rate = ExchangeRate::new(usd, eur, dec!(0.8)).unwrap();
 
         let mut exchange = Exchange::new();
-        exchange.set_rate(&usd_gbp_rate);
-        exchange.set_rate(&usd_eur_rate);
+        exchange.set_rate_and_inverse(&usd_gbp_rate).unwrap();
+        exchange.set_rate_and_inverse(&usd_eur_rate).unwrap();
 
         let usd_amount = Money::from_minor(8_00, test::USD);
         let min_in_gbp = Money::from_minor(6_00, test::GBP);
@@ -355,8 +363,8 @@ mod tests {
         let usd_eur_rate = ExchangeRate::new(usd, eur, dec!(0.8)).unwrap();
 
         let mut exchange = Exchange::new();
-        exchange.set_rate(&usd_gbp_rate);
-        exchange.set_rate(&usd_eur_rate);
+        exchange.set_rate_and_inverse(&usd_gbp_rate).unwrap();
+        exchange.set_rate_and_inverse(&usd_eur_rate).unwrap();
 
         let usd_amount = Money::from_minor(12_00, test::USD);
         let min_in_gbp = Money::from_minor(6_00, test::GBP);
@@ -378,8 +386,8 @@ mod tests {
         let usd_eur_rate = ExchangeRate::new(usd, eur, dec!(0.8)).unwrap();
 
         let mut exchange = Exchange::new();
-        exchange.set_rate(&usd_gbp_rate);
-        exchange.set_rate(&usd_eur_rate);
+        exchange.set_rate_and_inverse(&usd_gbp_rate).unwrap();
+        exchange.set_rate_and_inverse(&usd_eur_rate).unwrap();
 
         let gbp_amount = Money::from_minor(10_00, test::GBP);
         let eur_amount = Money::from_minor(10_00, test::EUR);
@@ -404,8 +412,8 @@ mod tests {
         let usd_eur_rate = ExchangeRate::new(usd, eur, dec!(0.8)).unwrap();
 
         let mut exchange = Exchange::new();
-        exchange.set_rate(&usd_gbp_rate);
-        exchange.set_rate(&usd_eur_rate);
+        exchange.set_rate_and_inverse(&usd_gbp_rate).unwrap();
+        exchange.set_rate_and_inverse(&usd_eur_rate).unwrap();
 
         let first_gbp_amount = Money::from_minor(10_00, test::GBP);
         let second_gbp_amount= Money::from_minor(10_00, test::EUR);
@@ -429,8 +437,8 @@ mod tests {
         let usd_eur_rate = ExchangeRate::new(usd, eur, dec!(0.8)).unwrap();
 
         let mut exchange = Exchange::new();
-        exchange.set_rate(&usd_gbp_rate);
-        exchange.set_rate(&usd_eur_rate);
+        exchange.set_rate_and_inverse(&usd_gbp_rate).unwrap();
+        exchange.set_rate_and_inverse(&usd_eur_rate).unwrap();
 
         let gbp_amount = Money::from_minor(10_00, test::GBP);
         let eur_amount = Money::from_minor(10_00, test::EUR);
@@ -448,14 +456,11 @@ mod tests {
     fn can_subtract_same_currencies_and_get_converted_result(){
         let usd = test::find("USD").unwrap();
         let gbp = test::find("GBP").unwrap();
-        let eur = test::find("EUR").unwrap();
 
-        let usd_gbp_rate = ExchangeRate::new(usd, gbp, dec!(0.7)).unwrap();
-        let usd_eur_rate = ExchangeRate::new(usd, eur, dec!(0.8)).unwrap();
+        let gbp_usd_rate = ExchangeRate::new(gbp, usd, dec!(0.7)).unwrap();
 
         let mut exchange = Exchange::new();
-        exchange.set_rate(&usd_gbp_rate);
-        exchange.set_rate(&usd_eur_rate);
+        exchange.set_rate_and_inverse(&gbp_usd_rate);
 
         let first_gbp_amount = Money::from_minor(10_00, test::GBP);
         let second_gbp_amount= Money::from_minor(9_00, test::GBP);
