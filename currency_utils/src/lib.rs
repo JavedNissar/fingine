@@ -10,6 +10,12 @@ macro_rules! assert_approx_eq {
     };
 }
 
+macro_rules! assert_rounded_eq {
+    ($lhs:expr, $rhs:expr) => {
+        assert_eq!($lhs.rounded_eq($rhs, 2), true)
+    };
+}
+
 #[derive(Debug, Error)]
 pub enum ErrorCode {
     #[error("Could not find exchange rate")]
@@ -22,6 +28,8 @@ pub enum ErrorCode {
     InvalidAmount,
     #[error("Ratio was invalid")]
     InvalidRatio,
+    #[error("Divide by zero occured")]
+    DivideByZero,
 }
 
 impl From<MoneyError> for ErrorCode {
@@ -31,6 +39,7 @@ impl From<MoneyError> for ErrorCode {
             // Whenever we have an invalid currency, that's usually because an arithmetic operation on money involved multiple currencies
             MoneyError::InvalidCurrency => ErrorCode::CouldNotMatchCurrencies,
             MoneyError::InvalidRatio => ErrorCode::InvalidRatio,
+            MoneyError::DivideByZero => ErrorCode::DivideByZero,
         }
     }
 }
@@ -157,6 +166,19 @@ impl<'a, T: FormattableCurrency> CurrencyIndependentSub<'a, T> for Money<'a, T>{
     }
 }
 
+pub trait RoundedEq{
+    fn rounded_eq(&self, other: &Self, dp: u32) -> bool; 
+}
+
+impl<'a, T:FormattableCurrency> RoundedEq for Money<'a, T>{
+    fn rounded_eq(&self, other: &Self, dp: u32) -> bool {
+        let rounded_self_amount = self.amount().round_dp(dp);
+        let rounded_other_amount = other.amount().round_dp(dp);
+
+        return rounded_self_amount == rounded_other_amount;
+    }
+}
+
 fn approximately_equal(orig: &Decimal, other: &Decimal, epsilon: &Decimal) -> bool{
     (orig - other < *epsilon) || (other - orig < *epsilon)
 }
@@ -205,11 +227,9 @@ mod tests {
         let gbp = test::find("GBP").unwrap();
 
         let usd_gbp_rate = ExchangeRate::new(usd, gbp, dec!(0.7)).unwrap();
-        let gbp_usd_rate = ExchangeRate::new(gbp, usd, dec!(1) / dec!(0.7)).unwrap();
         let mut exchange = Exchange::new(); 
 
-        exchange.set_rate(&usd_gbp_rate);
-        exchange.set_rate(&gbp_usd_rate);
+        exchange.set_rate_and_inverse(&usd_gbp_rate).unwrap();
         
         let usd_amount = Money::from_minor(2_00, test::USD);
         let gbp_amount = Money::from_minor(3_00, test::GBP);
@@ -235,7 +255,7 @@ mod tests {
         let usd_gbp_rate = ExchangeRate::new(usd, gbp, dec!(0.7)).unwrap();
         let mut exchange = Exchange::new(); 
 
-        exchange.set_rate(&usd_gbp_rate);
+        exchange.set_rate_and_inverse(&usd_gbp_rate).unwrap();
         
         let usd_amount = Money::from_minor(5_00, test::USD);
         let gbp_amount = Money::from_minor(1_00, test::GBP);
@@ -261,7 +281,7 @@ mod tests {
         let usd_gbp_rate = ExchangeRate::new(usd, gbp, dec!(0.7)).unwrap();
         let mut exchange = Exchange::new(); 
 
-        exchange.set_rate(&usd_gbp_rate);
+        exchange.set_rate_and_inverse(&usd_gbp_rate).unwrap();
         
         let usd_amount = Money::from_minor(10_00, test::USD);
         let gbp_amount = Money::from_minor(7_00, test::GBP);
@@ -297,8 +317,9 @@ mod tests {
         let max_in_eur = Money::from_minor(9_00, test::EUR);
 
         let clamped = usd_amount.currency_independent_clamp(&min_in_gbp, &max_in_eur, &exchange, test::USD).unwrap();
+        let expected_usd = Money::from_minor(8_57, test::USD);
 
-        assert_eq!(clamped.amount(), min_in_gbp.amount());
+        assert_rounded_eq!(clamped, &expected_usd);
     }
 
     #[test]
@@ -311,17 +332,17 @@ mod tests {
         let usd_eur_rate = ExchangeRate::new(usd, eur, dec!(0.8)).unwrap();
 
         let mut exchange = Exchange::new();
-        exchange.set_rate(&usd_gbp_rate);
-        exchange.set_rate(&usd_eur_rate);
+        exchange.set_rate_and_inverse(&usd_gbp_rate).unwrap();
+        exchange.set_rate_and_inverse(&usd_eur_rate).unwrap();
 
         let usd_amount = Money::from_minor(9_00, test::USD);
         let min_in_gbp = Money::from_minor(6_00, test::GBP);
         let max_in_eur = Money::from_minor(9_00, test::EUR);
 
         let clamped = usd_amount.currency_independent_clamp(&min_in_gbp, &max_in_eur, &exchange, test::USD).unwrap();
-        let expected_usd_amount = Money::from_minor(8_57, test::USD);
+        let expected_usd_amount = Money::from_minor(9_00, test::USD);
 
-        assert_eq!(clamped.amount(), expected_usd_amount.amount());
+        assert_rounded_eq!(clamped, &expected_usd_amount);
     }
 
     #[test]
@@ -344,7 +365,7 @@ mod tests {
         let clamped = usd_amount.currency_independent_clamp(&min_in_gbp, &max_in_eur, &exchange, test::USD).unwrap();
         let expected_usd_amount = Money::from_minor(11_25, test::USD);
 
-        assert_eq!(clamped.amount(), expected_usd_amount.amount());
+        assert_rounded_eq!(clamped, &expected_usd_amount);
     }
 
     #[test]
@@ -370,7 +391,7 @@ mod tests {
             &exchange).unwrap();
 
         
-        assert_approx_eq!(sum_of_different_currencies.amount(), summed_usd_amount.amount(), &dec!(0.1));
+        assert_rounded_eq!(sum_of_different_currencies, &summed_usd_amount);
     }
 
     #[test]
@@ -395,7 +416,7 @@ mod tests {
             test::USD, 
             &exchange).unwrap();
 
-        assert_eq!(sum_of_different_currencies.amount(), summed_usd_amount.amount());
+        assert_rounded_eq!(sum_of_different_currencies, &summed_usd_amount);
     }
 
     #[test]
@@ -413,14 +434,14 @@ mod tests {
 
         let gbp_amount = Money::from_minor(10_00, test::GBP);
         let eur_amount = Money::from_minor(10_00, test::EUR);
-        let usd_amount = Money::from_minor(1_79, test::USD);
+        let diff_in_usd = Money::from_minor(1_79, test::USD);
 
         let difference = gbp_amount.currency_independent_sub(
             &eur_amount, 
             test::USD, 
             &exchange).unwrap();
 
-        assert_eq!(difference.amount(), usd_amount.amount());
+        assert_rounded_eq!(difference, &diff_in_usd);
     }
 
     #[test]
@@ -438,13 +459,13 @@ mod tests {
 
         let first_gbp_amount = Money::from_minor(10_00, test::GBP);
         let second_gbp_amount= Money::from_minor(9_00, test::GBP);
-        let usd_amount = Money::from_minor(0_70, test::USD);
+        let expected_diff_in_usd = Money::from_minor(0_70, test::USD);
 
         let difference= first_gbp_amount.currency_independent_sub(
             &second_gbp_amount, 
             test::USD, 
             &exchange).unwrap();
 
-        assert_eq!(difference.amount(), usd_amount.amount());
+        assert_rounded_eq!(difference, &expected_diff_in_usd);
     }
 }
