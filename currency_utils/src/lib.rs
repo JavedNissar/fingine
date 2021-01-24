@@ -4,12 +4,6 @@ use rust_decimal::*;
 use thiserror::Error;
 use rust_decimal_macros::*;
 
-macro_rules! assert_approx_eq {
-    ($lhs:expr, $rhs:expr, $eps: expr) => {
-        assert_eq!(approximately_equal($lhs, $rhs, $eps), true)
-    };
-}
-
 macro_rules! assert_rounded_eq {
     ($lhs:expr, $rhs:expr) => {
         assert_eq!($lhs.rounded_eq($rhs, 2), true)
@@ -185,10 +179,6 @@ impl<'a, T:FormattableCurrency> RoundedEq for Money<'a, T>{
 
         return rounded_self_amount == rounded_other_amount;
     }
-}
-
-fn approximately_equal(orig: &Decimal, other: &Decimal, epsilon: &Decimal) -> bool{
-    (orig - other < *epsilon) || (other - orig < *epsilon)
 }
 
 #[cfg(test)]
