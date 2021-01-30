@@ -1,6 +1,7 @@
 use rust_decimal::prelude::*;
-use rusty_money::{money, Money};
+use rusty_money::{Money, FormattableCurrency, define_currency_set};
 use std::collections::HashMap;
+use currency_utils;
 
 macro_rules! decimal {
     ($m:expr, $e:expr) => {
@@ -9,16 +10,17 @@ macro_rules! decimal {
 }
 
 #[derive(Clone)]
-pub struct TaxBracket {
-    min_money: Money,
-    max_money: Option<Money>,
+pub struct TaxBracket<'a, T: FormattableCurrency> {
+    min_money: Money<'a, T>,
+    max_money: Option<Money<'a, T>>,
     rate: Decimal,
+    tax_currency: &'a T,
 }
 
-impl TaxBracket {
-    pub fn calculate_tax(&self, taxable_income: Money) -> Money {
+impl<'a, T: FormattableCurrency> TaxBracket<'a, T> {
+    pub fn calculate_tax(&self, taxable_income: Money<'a, T>) -> Money<'a, T> {
         if taxable_income < self.min_money {
-            return money!(0, "CAD");
+            return Money::from_minor(0, self.tax_currency);
         }
 
         if let Some(actual_max_money) = &self.max_money {
@@ -40,14 +42,14 @@ pub enum TaxDeductionCategory {
 }
 
 #[derive(Clone)]
-pub struct TaxDeduction {
+pub struct TaxDeduction<'a, T: FormattableCurrency> {
     tax_deduction_type: TaxDeductionCategory,
-    max_amount: Option<Money>,
+    max_amount: Option<Money<'a, T>>,
     inclusion_rate: Decimal,
 }
 
-impl TaxDeduction {
-    pub fn apply_deduction(&self, actual_deduction: ActualTaxDeduction) -> Money {
+impl<'a, T: FormattableCurrency> TaxDeduction<'a, T> {
+    pub fn apply_deduction(&self, actual_deduction: ActualTaxDeduction<'a, T>) -> Money<'a, T> {
         match &self.max_amount {
             Some(inner_max_amount) => {
                 if actual_deduction.money_to_deduct.amount() <= inner_max_amount.amount() {
@@ -61,9 +63,9 @@ impl TaxDeduction {
     }
 }
 
-pub struct ActualTaxDeduction {
+pub struct ActualTaxDeduction<'a, T: FormattableCurrency> {
     tax_deduction_type: TaxDeductionCategory,
-    money_to_deduct: Money,
+    money_to_deduct: Money<'a, T>,
 }
 
 #[derive(Debug)]
@@ -72,31 +74,34 @@ pub enum TaxCalculationErrorCode {
 }
 
 #[derive(Clone)]
-pub struct TaxRegime {
-    brackets: Vec<TaxBracket>,
-    deductions_map: HashMap<TaxDeductionCategory, TaxDeduction>,
+pub struct TaxRegime<'a, T: FormattableCurrency> {
+    brackets: Vec<TaxBracket<'a, T>>,
+    deductions_map: HashMap<TaxDeductionCategory, TaxDeduction<'a, T>>,
+    tax_currency: &'a T,
 }
 
-impl TaxRegime {
+impl<'a, T: FormattableCurrency> TaxRegime<'a, T> {
     pub fn new(
-        brackets: Vec<TaxBracket>,
-        deductions_map: HashMap<TaxDeductionCategory, TaxDeduction>,
-    ) -> TaxRegime {
+        brackets: Vec<TaxBracket<'a, T>>,
+        deductions_map: HashMap<TaxDeductionCategory, TaxDeduction<'a, T>>,
+        tax_currency: &'a T,
+    ) -> TaxRegime<'a, T> {
         let mut new_brackets = brackets.clone();
         new_brackets.sort_by(|a, b| a.min_money.partial_cmp(&b.min_money).unwrap());
         return TaxRegime {
             brackets: new_brackets,
             deductions_map: deductions_map,
+            tax_currency: tax_currency,
         };
     }
 
     fn determine_deductions_amount(
         &self,
-        deductions: Vec<ActualTaxDeduction>,
-    ) -> Result<Money, TaxCalculationErrorCode> {
+        deductions: Vec<ActualTaxDeduction<'a, T>>,
+    ) -> Result<Money<'a, T>, TaxCalculationErrorCode> {
         deductions
             .iter()
-            .try_fold(money!(0, "CAD"), |acc, actual_tax_deduction| {
+            .try_fold(Money::from_minor(0, self.tax_currency), |acc, actual_tax_deduction| {
                 match self
                     .deductions_map
                     .get(&actual_tax_deduction.tax_deduction_type)
@@ -112,18 +117,18 @@ impl TaxRegime {
             })
     }
 
-    pub fn calculate_tax(&self, taxable_income: Money) -> Money {
+    pub fn calculate_tax(&self, taxable_income: Money<'a, T>) -> Money<'a, T> {
         self.brackets
             .iter()
             .map(|bracket| bracket.calculate_tax(taxable_income.clone()))
-            .fold(money!(0, "CAD"), |acc, bracket_tax| acc + bracket_tax)
+            .fold(Money::from_minor(0, taxable_income.currency()), |acc, bracket_tax| acc + bracket_tax)
     }
 
     pub fn calculate_tax_with_deductions(
         &self,
-        income: Money,
-        deductions: Vec<ActualTaxDeduction>,
-    ) -> Result<Money, TaxCalculationErrorCode> {
+        income: Money<'a, T>,
+        deductions: Vec<ActualTaxDeduction<'a, T>>,
+    ) -> Result<Money<'a, T>, TaxCalculationErrorCode> {
         let deductions_amount = self.determine_deductions_amount(deductions);
         match deductions_amount {
             Ok(deductions_total) => Ok(self.calculate_tax(income - deductions_total)),
@@ -136,58 +141,82 @@ impl TaxRegime {
 mod tests {
     use super::*;
     use maplit::*;
-    use rusty_money::money;
+
+    define_currency_set!(
+        test {
+            CAD: {
+                code: "CAD",
+                exponent: 2,
+                locale: EnUs,
+                minor_units: 100,
+                name: "CAD",
+                symbol: "$",
+                symbol_first: true,
+            }
+        }
+    );
 
     #[test]
     fn simple_example() {
+        let cad = test::find("CAD").unwrap();        
+
         let lowest = TaxBracket {
-            min_money: money!(0.0, "CAD"),
-            max_money: Some(money!(10000, "CAD")),
-            rate: decimal!(01, 1),
+            min_money: Money::from_minor(0, cad), 
+            max_money: Some(Money::from_minor(10_000_00, cad)),
+            rate: decimal!(0_1, 1),
+            tax_currency: cad,
         };
         let middle = TaxBracket {
-            min_money: money!(10000, "CAD"),
-            max_money: Some(money!(20000, "CAD")),
-            rate: decimal!(02, 1),
+            min_money: Money::from_minor(10_000, cad),
+            max_money: Some(Money::from_minor(20_000, cad)),
+            rate: decimal!(0_2, 1),
+            tax_currency: cad,
         };
         let highest = TaxBracket {
-            min_money: money!(20000, "CAD"),
+            min_money: Money::from_minor(20_000, cad),
             max_money: None,
-            rate: decimal!(03, 1),
+            rate: decimal!(0_3, 1),
+            tax_currency: cad,
         };
 
-        let regime = TaxRegime::new(vec![lowest, middle, highest], hashmap! {});
+        let regime = TaxRegime::new(vec![lowest, middle, highest], hashmap! {}, cad);
 
-        let over_highest_tax = regime.calculate_tax(money!(25000, "CAD"));
-        assert_eq!(over_highest_tax, money!(6500, "CAD"));
+        let over_highest_tax = regime.calculate_tax(Money::from_minor(25_000, cad));
+        assert_eq!(over_highest_tax, Money::from_minor(6_500, cad));
 
-        let middle_tax = regime.calculate_tax(money!(15000, "CAD"));
-        assert_eq!(middle_tax, money!(2000, "CAD"));
+        let middle_tax = regime.calculate_tax(Money::from_minor(15_000, cad));
+        assert_eq!(middle_tax, Money::from_minor(2000, cad));
 
-        let lowest_tax = regime.calculate_tax(money!(5000, "CAD"));
-        assert_eq!(lowest_tax, money!(500, "CAD"));
+        let lowest_tax = regime.calculate_tax(Money::from_minor(5_000, cad));
+        assert_eq!(lowest_tax, Money::from_minor(500, cad));
     }
 
     #[test]
     fn single_bracket_example() {
+        let cad = test::find("CAD").unwrap();        
+
         let lowest = TaxBracket {
-            min_money: money!(0.0, "CAD"),
-            max_money: Some(money!(10000.0, "CAD")),
-            rate: decimal!(01, 1),
+            min_money: Money::from_minor(0_0, cad),
+            max_money: Some(Money::from_minor(10_000_00, cad)),
+            rate: decimal!(0_1, 1),
+            tax_currency: cad,
         };
 
-        let regime = TaxRegime::new(vec![lowest], hashmap! {});
-        let tax = regime.calculate_tax(money!(10000, "CAD"));
+        let regime = TaxRegime::new(vec![lowest], hashmap! {}, cad);
+        let tax = regime.calculate_tax(Money::from_minor(10_000_00, cad)); 
 
-        assert_eq!(tax, money!(1000, "CAD"));
+        assert_eq!(tax, Money::from_minor(1_000_00, cad));
     }
 
     #[test]
     fn deductions_example() {
+        let cad = test::find("CAD").unwrap();        
+
         let single = TaxBracket {
-            min_money: money!(0.0, "CAD"),
+            min_money: Money::from_minor(0_0, cad),
             max_money: None,
             rate: decimal!(01, 1),
+            tax_currency: cad,
         };
         let capital_gains_deduction = TaxDeduction {
             tax_deduction_type: TaxDeductionCategory::CapitalGains,
@@ -198,15 +227,16 @@ mod tests {
         let regime = TaxRegime::new(
             vec![single],
             hashmap! { TaxDeductionCategory::CapitalGains => capital_gains_deduction},
+            cad,
         );
         let actual_deductions = vec![ActualTaxDeduction {
             tax_deduction_type: TaxDeductionCategory::CapitalGains,
-            money_to_deduct: money!(5000, "CAD"),
+            money_to_deduct: Money::from_minor(5_000_00, cad),
         }];
-        let tax = regime.calculate_tax_with_deductions(money!(10000, "CAD"), actual_deductions);
+        let tax = regime.calculate_tax_with_deductions(Money::from_minor(10_000_00, cad), actual_deductions);
 
         match tax {
-            Ok(result) => assert_eq!(result, money!(500, "CAD")),
+            Ok(result) => assert_eq!(result, Money::from_minor(500_00, cad)),
             Err(_) => assert!(false, "Tax should not be an Err"),
         }
     }

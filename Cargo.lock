@@ -25,19 +25,13 @@ dependencies = [
  "anyhow",
  "rust_decimal",
  "rust_decimal_macros",
- "rusty-money 0.4.0",
+ "rusty-money",
  "thiserror",
 ]
 
 [[package]]
 name = "finsim"
 version = "0.1.0"
-
-[[package]]
-name = "lazy_static"
-version = "1.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "maplit"
@@ -99,17 +93,6 @@ dependencies = [
 
 [[package]]
 name = "rusty-money"
-version = "0.3.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94d1465869b5a28ff9e1f700555053419efea6d064c6db01a7ed86a3616a04d2"
-dependencies = [
- "lazy_static",
- "rust_decimal",
- "rust_decimal_macros",
-]
-
-[[package]]
-name = "rusty-money"
 version = "0.4.0"
 source = "git+https://github.com/RestitutorOrbis/rusty_money?branch=javed.account-for-reverse#1635758cd81dba3be7c88d6a3c028964d4e31472"
 dependencies = [
@@ -138,9 +121,10 @@ dependencies = [
 name = "taxes"
 version = "0.1.0"
 dependencies = [
+ "currency_utils",
  "maplit",
  "rust_decimal",
- "rusty-money 0.3.6",
+ "rusty-money",
 ]
 
 [[package]]

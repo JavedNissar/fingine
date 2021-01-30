@@ -8,5 +8,6 @@ edition = "2018"
 
 [dependencies]
 maplit = "1.0.2"
-rusty-money = "0.3.6"
+rusty-money = { git = "https://github.com/RestitutorOrbis/rusty_money", branch = "javed.account-for-reverse" }
 rust_decimal = "1.9.0"
+currency_utils = { path = "../currency_utils" }
