@@ -31,3 +31,5 @@ impl Sub for Money {
         Self { amount: self.amount - other.amount, currency: self.currency, rates: self.rates }
     }
 }
+
+// TODO: Write tests
