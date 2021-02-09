@@ -107,6 +107,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6159e3c76cab06f6bc466244d43b35e77e9500cd685da87620addadc2a4c40b1"
 
 [[package]]
+name = "simple_money"
+version = "0.1.0"
+dependencies = [
+ "rust_decimal",
+]
+
+[[package]]
 name = "syn"
 version = "1.0.59"
 source = "registry+https://github.com/rust-lang/crates.io-index"
