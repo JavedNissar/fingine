@@ -179,4 +179,58 @@ impl Mul<Decimal> for Money {
     }
 }
 
-// TODO: Write tests
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rust_decimal_macros::*;
+
+    #[test]
+    fn can_compare_usd_amount_with_greater_cad_amount(){
+
+    }
+
+    #[test]
+    fn can_compare_usd_amount_with_less_cad_amount(){
+
+    }
+
+    #[test]
+    fn can_compare_usd_amount_with_equal_cad_amount(){
+
+    }
+
+    #[test]
+    fn can_clamp_with_value_less_than_range(){
+
+    }
+
+    #[test]
+    fn can_clamp_with_value_within_range(){
+
+    }
+
+    #[test]
+    fn can_clamp_with_value_greater_than_range(){
+
+    }
+
+    #[test]
+    fn can_add_different_currencies_and_get_converted_result(){
+
+    }
+
+    #[test]
+    fn can_add_same_currencies_and_get_converted_result(){
+
+    }
+
+    #[test]
+    fn can_subtract_different_currencies_and_get_converted_result(){
+
+    }
+
+    #[test]
+    fn can_subtract_same_currencies_and_get_converted_result(){
+
+    }
+}
