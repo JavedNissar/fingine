@@ -71,8 +71,13 @@ impl Exchange {
     }
 
     pub fn convert(&self, money: Money, currency: Currency) -> Result<Money, MoneyError> {
+        if money.currency == currency {
+            return Ok(money);
+        }
+
         let rate = self.get_rate(money.currency, currency)?;
-        return Ok(money * rate);
+        let converted_money = Money { amount: money.amount * rate, currency: currency };
+        return Ok(converted_money);
     }
     
     pub fn add(&self, first: Money, second: Money, output_currency: Currency) -> Result<Money, MoneyError> {
@@ -91,7 +96,7 @@ impl Exchange {
         }else{
             let first_in_output_currency = self.convert(first, output_currency)?;
             let second_in_output_currency =self.convert(second, output_currency)?;
-            Ok(first_in_output_currency + second_in_output_currency)
+            Ok(first_in_output_currency - second_in_output_currency)
         }
     }
 
@@ -110,6 +115,15 @@ impl Exchange {
         }else{
             let second_in_first_currency = self.convert(second, first.currency)?;
             Ok(first <= second_in_first_currency)
+        }
+    }
+    
+    pub fn eq(&self, first: Money, second: Money) -> Result<bool, MoneyError> {
+        if first.currency == second.currency {
+            Ok(first == second)
+        }else{
+            let second_in_first_currency = self.convert(second, first.currency)?;
+            Ok(first == second_in_first_currency)
         }
     }
 
@@ -188,11 +202,21 @@ impl Sub for Money {
     }
 }
 
-impl Mul<Decimal> for Money {
-    type Output = Self;
+pub trait RoundedEq{
+    fn rounded_eq(&self, other: Self, dp: u32) -> bool;
+}
 
-    fn mul(self, rhs: Decimal) -> Self::Output {
-        Self { amount: self.amount * rhs, currency: self.currency }
+impl RoundedEq for Money{
+    fn rounded_eq(&self, other: Self, dp: u32) -> bool {
+        if self.currency != other.currency {
+            return false;
+        }
+
+
+        let rounded_self_amount = self.amount.round_dp(dp);
+        let rounded_other_amount = other.amount.round_dp(dp);
+
+        return rounded_self_amount == rounded_other_amount;
     }
 }
 
@@ -200,6 +224,17 @@ impl Mul<Decimal> for Money {
 mod tests {
     use super::*;
     use rust_decimal_macros::*;
+
+    macro_rules! assert_rounded_eq {
+        ($lhs:expr, $rhs:expr) => {
+            assert!(
+                $lhs.rounded_eq($rhs, 2), 
+                "assertion failed! left: {:?}, right: {:?}", 
+                $lhs, 
+                $rhs
+            )
+        };
+    }
 
     fn setup() -> Exchange {
         let mut exchange = Exchange::new();
@@ -213,6 +248,17 @@ mod tests {
     }
 
     #[test]
+    fn can_compare_same_currencies(){
+        let one = usd_money!(1);
+        let two = usd_money!(2);
+
+        assert_eq!(one < two, true);
+        assert_eq!(two > one, true);
+        assert_eq!(two == one, false);
+        assert_eq!(two == two, true);
+    }
+
+    #[test]
     fn can_compare_usd_amount_with_greater_cad_amount(){
         let exchange = setup();
 
@@ -221,13 +267,13 @@ mod tests {
 
         assert_eq!(exchange.lt(usd_money, cad_money).unwrap(), true);
         assert_eq!(exchange.lte(usd_money, cad_money).unwrap(), true);
-        assert_eq!(usd_money == cad_money, false);
+        assert_eq!(exchange.eq(usd_money, cad_money).unwrap(), false);
         assert_eq!(exchange.gte(usd_money, cad_money).unwrap(), false);
         assert_eq!(exchange.gt(usd_money, cad_money).unwrap(), false);
 
         assert_eq!(exchange.lt(cad_money, usd_money).unwrap(), false);
         assert_eq!(exchange.lte(cad_money, usd_money).unwrap(), false);
-        assert_eq!(cad_money == usd_money, false);
+        assert_eq!(exchange.eq(cad_money, usd_money).unwrap(), false);
         assert_eq!(exchange.gte(cad_money, usd_money).unwrap(), true);
         assert_eq!(exchange.gt(cad_money, usd_money).unwrap(), true);
     }
@@ -241,14 +287,14 @@ mod tests {
 
         assert_eq!(exchange.lt(usd_money, cad_money).unwrap(), false);
         assert_eq!(exchange.lte(usd_money, cad_money).unwrap(), false);
-        assert_eq!(usd_money == cad_money, false);
+        assert_eq!(exchange.eq(usd_money , cad_money).unwrap(), false);
         assert_eq!(exchange.gte(usd_money, cad_money).unwrap(), true);
         assert_eq!(exchange.gt(usd_money, cad_money).unwrap(), true);
 
         assert_eq!(exchange.lt(cad_money, usd_money).unwrap(), true);
         assert_eq!(exchange.lte(cad_money, usd_money).unwrap(), true);
-        assert_eq!(cad_money == usd_money, false);
-        assert_eq!(exchange.gte(cad_money, cad_money).unwrap(), false);
+        assert_eq!(exchange.eq(cad_money , usd_money).unwrap(), false);
+        assert_eq!(exchange.gte(cad_money, usd_money).unwrap(), false);
         assert_eq!(exchange.gt(cad_money, usd_money).unwrap(), false);
     }
 
@@ -261,13 +307,13 @@ mod tests {
 
         assert_eq!(exchange.lt(usd_money, cad_money).unwrap(), false);
         assert_eq!(exchange.lte(usd_money, cad_money).unwrap(), true);
-        assert_eq!(usd_money == cad_money, true);
+        assert_eq!(exchange.eq(usd_money , cad_money).unwrap(), true);
         assert_eq!(exchange.gte(usd_money, cad_money).unwrap(), true);
         assert_eq!(exchange.gt(usd_money, cad_money).unwrap(), false);
 
         assert_eq!(exchange.lt(cad_money, usd_money).unwrap(), false);
         assert_eq!(exchange.lte(cad_money, usd_money).unwrap(), true);
-        assert_eq!(cad_money == usd_money, true);
+        assert_eq!(exchange.eq(cad_money , usd_money).unwrap(), true);
         assert_eq!(exchange.gte(cad_money, usd_money).unwrap(), true);
         assert_eq!(exchange.gt(cad_money, usd_money).unwrap(), false);
     }
@@ -284,10 +330,11 @@ mod tests {
         let clamped_usd = exchange.clamp(input, min, max, Currency::USD).unwrap();
 
         let expected_clamped_cad = cad_money!(2);
-        let expected_clamped_usd = usd_money!(1.57);
+        let expected_clamped_usd_amount = dec!(2) * dec!(1)/dec!(1.3);
+        let expected_clamped_usd = Money { amount: expected_clamped_usd_amount, currency: Currency::USD };
 
-        assert_eq!(clamped_cad, expected_clamped_cad);
-        assert_eq!(clamped_usd, expected_clamped_usd);
+        assert_rounded_eq!(clamped_cad, expected_clamped_cad);
+        assert_rounded_eq!(clamped_usd, expected_clamped_usd);
     }
 
     #[test]
@@ -305,8 +352,8 @@ mod tests {
         let expected_usd_amount = dec!(2.5) * (dec!(1)/dec!(1.3));
         let expected_clamped_usd = Money { amount: expected_usd_amount, currency: Currency::USD };
         
-        assert_eq!(clamped_cad, expected_clamped_cad);
-        assert_eq!(clamped_usd, expected_clamped_usd);
+        assert_rounded_eq!(clamped_cad, expected_clamped_cad);
+        assert_rounded_eq!(clamped_usd, expected_clamped_usd);
     }
 
     #[test]
@@ -323,8 +370,8 @@ mod tests {
         let expected_clamped_cad = cad_money!(0.65);
         let expected_clamped_usd = usd_money!(0.5);
 
-        assert_eq!(clamped_cad, expected_clamped_cad);
-        assert_eq!(clamped_usd, expected_clamped_usd);
+        assert_rounded_eq!(clamped_cad, expected_clamped_cad);
+        assert_rounded_eq!(clamped_usd, expected_clamped_usd);
     }
 
     #[test]
@@ -341,8 +388,8 @@ mod tests {
         let expected_usd_sum_amount = dec!(1) * dec!(1)/dec!(1.3) + dec!(1);
         let expected_usd_sum = Money { amount: expected_usd_sum_amount, currency: Currency::USD };
 
-        assert_eq!(sum_in_cad, expected_cad_sum);
-        assert_eq!(sum_in_usd, expected_usd_sum);
+        assert_rounded_eq!(sum_in_cad, expected_cad_sum);
+        assert_rounded_eq!(sum_in_usd, expected_usd_sum);
     }
 
     #[test]
@@ -359,8 +406,8 @@ mod tests {
         let expected_usd_sum_amount = dec!(1) * dec!(1)/dec!(1.3) * dec!(2);
         let expected_usd_sum = Money { amount: expected_usd_sum_amount, currency: Currency::USD };
 
-        assert_eq!(sum_in_cad, expected_cad_sum);
-        assert_eq!(sum_in_usd, expected_usd_sum);
+        assert_rounded_eq!(sum_in_cad, expected_cad_sum);
+        assert_rounded_eq!(sum_in_usd, expected_usd_sum);
     }
 
     #[test]
@@ -373,12 +420,12 @@ mod tests {
         let diff_in_cad = exchange.sub(first, second, Currency::CAD).unwrap();
         let diff_in_usd = exchange.sub(first, second, Currency::USD).unwrap();
 
-        let expected_cad_diff = cad_money!(0.6);
+        let expected_cad_diff = cad_money!(0.7);
         let expected_usd_diff_amount = dec!(2) * dec!(1)/dec!(1.3) - dec!(1);
         let expected_usd_diff = Money { amount: expected_usd_diff_amount, currency: Currency::USD };
 
-        assert_eq!(diff_in_cad, expected_cad_diff);
-        assert_eq!(diff_in_usd, expected_usd_diff);
+        assert_rounded_eq!(diff_in_cad, expected_cad_diff);
+        assert_rounded_eq!(diff_in_usd, expected_usd_diff);
     }
 
     #[test]
@@ -395,7 +442,7 @@ mod tests {
         let expected_usd_diff_amount = dec!(1) * dec!(1)/dec!(1.3);
         let expected_usd_diff = Money { amount: expected_usd_diff_amount, currency: Currency::USD };
 
-        assert_eq!(diff_in_cad, expected_cad_diff);
-        assert_eq!(diff_in_usd, expected_usd_diff);
+        assert_rounded_eq!(diff_in_cad, expected_cad_diff);
+        assert_rounded_eq!(diff_in_usd, expected_usd_diff);
     }
 }
