@@ -130,10 +130,10 @@ dependencies = [
 name = "taxes"
 version = "0.1.0"
 dependencies = [
- "currency_utils",
  "maplit",
  "rust_decimal",
- "rusty-money",
+ "rust_decimal_macros",
+ "simple_money",
 ]
 
 [[package]]

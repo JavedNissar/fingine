@@ -20,8 +20,8 @@ pub enum MoneyError{
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct Money {
-    amount: Decimal,
-    currency: Currency,
+    pub amount: Decimal,
+    pub currency: Currency,
 }
 
 #[derive(PartialEq, Eq, Hash)]
@@ -190,6 +190,14 @@ impl Sub for Money {
     }
 }
 
+impl Mul<Decimal> for Money {
+    type Output = Self;
+
+     fn mul(self, rhs: Decimal) -> Self::Output {
+        Self { amount: self.amount * rhs, currency: self.currency }
+     }
+}
+
 pub trait RoundedEq{
     fn rounded_eq(&self, other: Self, dp: u32) -> bool;
 }
@@ -208,23 +216,24 @@ impl RoundedEq for Money{
     }
 }
 
+#[macro_export]
+macro_rules! cad_money {
+    ($amount: expr) => {
+        Money { amount: dec!($amount), currency: Currency::CAD }
+    };
+}
+
+#[macro_export]
+macro_rules! usd_money {
+    ($amount: expr) => {
+        Money { amount: dec!($amount), currency: Currency::USD }
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use rust_decimal_macros::*;
-
-    macro_rules! cad_money {
-        ($amount: expr) => {
-            Money { amount: dec!($amount), currency: Currency::CAD }
-        };
-    }
-
-    macro_rules! usd_money {
-        ($amount: expr) => {
-            Money { amount: dec!($amount), currency: Currency::USD }
-        };
-    }
-
 
     macro_rules! assert_rounded_eq {
         ($lhs:expr, $rhs:expr) => {
