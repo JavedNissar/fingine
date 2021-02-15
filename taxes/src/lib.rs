@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use simple_money::*;
 use rust_decimal_macros::*;
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct TaxBracket{
     min_money: Money,
     max_money: Option<Money>,
@@ -13,50 +13,59 @@ pub struct TaxBracket{
 impl TaxBracket {
     pub fn calculate_tax(&self, taxable_income: Money) -> Money {
         if taxable_income < self.min_money {
-            return Money { amount: Decimal::new(0, 0), currency: self.min_money.currency };
+            return Money { amount: dec!(0), currency: self.min_money.currency };
         }
 
-        if let Some(actual_max_money) = &self.max_money {
-            let actual_max_money_clone = actual_max_money.clone();
-            if taxable_income >= actual_max_money_clone {
-                return actual_max_money_clone * self.rate;
-            } else {
-                return (taxable_income - self.min_money.clone()) * self.rate;
+        if let Some(max_money) = self.max_money {
+            if taxable_income >= max_money {
+                return max_money * self.rate;
+            }else{
+                return (taxable_income - self.min_money) * self.rate;
             }
-        } else {
-            return (taxable_income - self.min_money.clone()) * self.rate;
         }
+
+        return (taxable_income - self.min_money) * self.rate;
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum TaxDeductionCategory {
     CapitalGains,
+    LowIncome,
+    CommunityFood,
+    Childcare,
+    PoliticalContribution,
+    CoopEducation,
+    ElderlyPublicTransit,
+    ElderlyPropertyTax,
+    TrilliumBenefit,
+    NorthernOntarioEnergy,
+    OntarioEnergyAndPropertyTax,
+    SalesTax,
 }
 
-#[derive(Clone)]
-pub struct TaxDeduction {
+#[derive(Clone, Copy)]
+pub struct TaxDeductionRule {
     tax_deduction_type: TaxDeductionCategory,
     max_amount: Option<Money>,
     inclusion_rate: Decimal,
 }
 
-impl TaxDeduction {
-    pub fn apply_deduction(&self, actual_deduction: ActualTaxDeduction) -> Money {
-        match &self.max_amount {
-            Some(inner_max_amount) => {
-                if actual_deduction.money_to_deduct.amount <= inner_max_amount.amount {
-                    inner_max_amount.clone() * self.inclusion_rate
-                } else {
-                    actual_deduction.money_to_deduct * self.inclusion_rate
-                }
+impl TaxDeductionRule {
+    pub fn apply_deduction(&self, actual_deduction: TaxDeduction) -> Money {
+        if let Some(max_amount) = self.max_amount {
+            if actual_deduction.money_to_deduct <= max_amount {
+                return max_amount * self.inclusion_rate
+            }else{
+                return actual_deduction.money_to_deduct * self.inclusion_rate
             }
-            None => actual_deduction.money_to_deduct * self.inclusion_rate,
         }
+
+        return actual_deduction.money_to_deduct * self.inclusion_rate;
     }
 }
 
-pub struct ActualTaxDeduction {
+pub struct TaxDeduction {
     tax_deduction_type: TaxDeductionCategory,
     money_to_deduct: Money,
 }
@@ -69,16 +78,18 @@ pub enum TaxCalculationErrorCode {
 #[derive(Clone)]
 pub struct TaxRegime {
     brackets: Vec<TaxBracket>,
-    deductions_map: HashMap<TaxDeductionCategory, TaxDeduction>,
+    deductions_map: HashMap<TaxDeductionCategory, TaxDeductionRule>,
     tax_currency: Currency,
 }
 
 impl TaxRegime {
     pub fn new(
         brackets: Vec<TaxBracket>,
-        deductions_map: HashMap<TaxDeductionCategory, TaxDeduction>,
+        deductions_map: HashMap<TaxDeductionCategory, TaxDeductionRule>,
         currency: Currency,
     ) -> TaxRegime {
+        // TODO: Validate currencies
+
         let mut new_brackets = brackets.clone();
         new_brackets.sort_by(|a, b| a.min_money.partial_cmp(&b.min_money).unwrap());
         return TaxRegime {
@@ -90,7 +101,7 @@ impl TaxRegime {
 
     fn determine_deductions_amount(
         &self,
-        deductions: Vec<ActualTaxDeduction>,
+        deductions: Vec<TaxDeduction>,
     ) -> Result<Money, TaxCalculationErrorCode> {
         deductions
             .iter()
@@ -120,7 +131,7 @@ impl TaxRegime {
     pub fn calculate_tax_with_deductions(
         &self,
         income: Money,
-        deductions: Vec<ActualTaxDeduction>,
+        deductions: Vec<TaxDeduction>,
     ) -> Result<Money, TaxCalculationErrorCode> {
         let deductions_amount = self.determine_deductions_amount(deductions);
         match deductions_amount {
@@ -186,7 +197,7 @@ mod tests {
             max_money: None,
             rate: dec!(0.1),
         };
-        let capital_gains_deduction = TaxDeduction {
+        let capital_gains_deduction = TaxDeductionRule {
             tax_deduction_type: TaxDeductionCategory::CapitalGains,
             max_amount: None,
             inclusion_rate: dec!(0.5),
@@ -197,7 +208,7 @@ mod tests {
             hashmap! { TaxDeductionCategory::CapitalGains => capital_gains_deduction},
             Currency::CAD,
         );
-        let actual_deductions = vec![ActualTaxDeduction {
+        let actual_deductions = vec![TaxDeduction {
             tax_deduction_type: TaxDeductionCategory::CapitalGains,
             money_to_deduct: cad_money!(5000),
         }];
