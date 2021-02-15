@@ -67,10 +67,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "registered_accounts"
-version = "0.1.0"
-
-[[package]]
 name = "rust_decimal"
 version = "1.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -127,7 +123,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "taxes"
+name = "tax_engine"
 version = "0.1.0"
 dependencies = [
  "maplit",

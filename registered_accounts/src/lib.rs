@@ -1,4 +1,0 @@
-enum RegisteredAccountType {
-    TFSA,
-    RRSP,
-}
