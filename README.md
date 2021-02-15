@@ -4,9 +4,14 @@ Finsim is a Rust library that intends to provide personal finance simulation cap
 
 # Principles
 
-1. Focus on features and situations useful to those who are in the process of building wealth
-2. Emphasize geographic and temporal flexibility with all features
-3. Emphasize modularization to enable finsim's components to be used as individual libraries
+1. Emphasize geographic and temporal flexibility with all features with the caveat that this should only work in Canada and the US
+2. Emphasize modularization to enable finsim's components to be used as individual libraries
+
+# Components
+
+- `simple_money`: a crate that encodes the concept of money for both Canada and the US
+- `tax_engine`: a crate that will calculate taxes accounting for deductions across Canada and the US
+- `finsim`: a crate that will encode the concept of accounts and assets as well as an event system that can be used to modify accounts and assets 
 
 # Roadmap
 
