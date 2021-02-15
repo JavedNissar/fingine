@@ -5,7 +5,7 @@ use rust_decimal::Decimal;
 use thiserror::Error;
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
-enum Currency {
+pub enum Currency {
     CAD,
     USD,
 }
@@ -19,21 +19,9 @@ pub enum MoneyError{
 }
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
-struct Money {
+pub struct Money {
     amount: Decimal,
     currency: Currency,
-}
-
-macro_rules! cad_money {
-    ($amount: expr) => {
-        Money { amount: dec!($amount), currency: Currency::CAD }
-    };
-}
-
-macro_rules! usd_money {
-    ($amount: expr) => {
-        Money { amount: dec!($amount), currency: Currency::USD }
-    };
 }
 
 #[derive(PartialEq, Eq, Hash)]
@@ -42,7 +30,7 @@ struct ExchangeRateQuery{
     to: Currency,
 }
 
-struct Exchange {
+pub struct Exchange {
     rates: HashMap<ExchangeRateQuery, Decimal>,
 }
 
@@ -224,6 +212,19 @@ impl RoundedEq for Money{
 mod tests {
     use super::*;
     use rust_decimal_macros::*;
+
+    macro_rules! cad_money {
+        ($amount: expr) => {
+            Money { amount: dec!($amount), currency: Currency::CAD }
+        };
+    }
+
+    macro_rules! usd_money {
+        ($amount: expr) => {
+            Money { amount: dec!($amount), currency: Currency::USD }
+        };
+    }
+
 
     macro_rules! assert_rounded_eq {
         ($lhs:expr, $rhs:expr) => {
