@@ -231,12 +231,9 @@ mod tests {
             cad_money!(0), 
             Some(usd_money!(1)), 
             dec!(0.1)
-        );
+        ).unwrap_err();
 
-        match invalid {
-            Err(TaxError::MismatchedCurrencies) => assert!(true),
-            _ => assert!(false, "Tax should be an Err")
-        }
+        assert_eq!(invalid, TaxError::MismatchedCurrencies);
     }
 
     #[test]
