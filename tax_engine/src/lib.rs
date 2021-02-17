@@ -2,8 +2,15 @@ use rust_decimal::prelude::*;
 use std::collections::HashMap;
 use simple_money::*;
 use rust_decimal_macros::*;
+use thiserror::Error;
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Error, PartialEq)]
+pub enum TaxError {
+    #[error("Mismatched currencies")]
+    MismatchedCurrencies,
+}
+
+#[derive(Clone, Copy, Debug)]
 pub struct TaxBracket{
     min_money: Money,
     max_money: Option<Money>,
@@ -11,6 +18,34 @@ pub struct TaxBracket{
 }
 
 impl TaxBracket {
+    fn new_tax_bracket_with_max(
+        min_money: Money,
+        max_money: Money,
+        rate: Decimal,
+    ) -> Result<TaxBracket, TaxError> {
+        if min_money.currency != max_money.currency {
+            Err(TaxError::MismatchedCurrencies)
+        }else{
+            Ok(TaxBracket{
+                min_money,
+                max_money: Some(max_money),
+                rate,
+            })
+        }
+    }
+
+    pub fn new(
+        min_money: Money,
+        max_money: Option<Money>,
+        rate: Decimal,
+    ) -> Result<TaxBracket, TaxError> {
+        if let Some(max_money) = max_money {
+            Self::new_tax_bracket_with_max(min_money, max_money, rate)
+        }else{
+            Ok(TaxBracket{ min_money, max_money: None, rate})
+        }
+    }
+
     pub fn calculate_tax(&self, taxable_income: Money) -> Money {
         if taxable_income < self.min_money {
             return Money { amount: dec!(0), currency: self.min_money.currency };
@@ -188,6 +223,20 @@ mod tests {
         let tax = regime.calculate_tax(cad_money!(10_000));
 
         assert_eq!(tax, cad_money!(1000));
+    }
+
+    #[test]
+    fn invalid_bracket(){
+        let invalid = TaxBracket::new(
+            cad_money!(0), 
+            Some(usd_money!(1)), 
+            dec!(0.1)
+        );
+
+        match invalid {
+            Err(TaxError::MismatchedCurrencies) => assert!(true),
+            _ => assert!(false, "Tax should be an Err")
+        }
     }
 
     #[test]

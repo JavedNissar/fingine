@@ -130,6 +130,7 @@ dependencies = [
  "rust_decimal",
  "rust_decimal_macros",
  "simple_money",
+ "thiserror",
 ]
 
 [[package]]
