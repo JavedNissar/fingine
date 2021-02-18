@@ -8,6 +8,8 @@ use thiserror::Error;
 pub enum TaxError {
     #[error("Mismatched currencies")]
     MismatchedCurrencies,
+    #[error("Could not find deduction")]
+    CouldNotFindDeduction,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -81,33 +83,28 @@ pub enum TaxDeductionCategory {
 
 #[derive(Clone, Copy)]
 pub struct TaxDeductionRule {
-    tax_deduction_type: TaxDeductionCategory,
-    max_amount: Option<Money>,
-    inclusion_rate: Decimal,
+    pub tax_deduction_type: TaxDeductionCategory,
+    pub max_amount: Option<Money>,
+    pub inclusion_rate: Decimal,
 }
 
 impl TaxDeductionRule {
-    pub fn apply_deduction(&self, actual_deduction: TaxDeduction) -> Money {
+    pub fn apply_deduction(&self, deduction: TaxDeduction) -> Money {
         if let Some(max_amount) = self.max_amount {
-            if actual_deduction.money_to_deduct <= max_amount {
+            if deduction.money_to_deduct <= max_amount {
                 return max_amount * self.inclusion_rate
             }else{
-                return actual_deduction.money_to_deduct * self.inclusion_rate
+                return deduction.money_to_deduct * self.inclusion_rate
             }
         }
 
-        return actual_deduction.money_to_deduct * self.inclusion_rate;
+        return deduction.money_to_deduct * self.inclusion_rate;
     }
 }
 
 pub struct TaxDeduction {
-    tax_deduction_type: TaxDeductionCategory,
-    money_to_deduct: Money,
-}
-
-#[derive(Debug, Clone)]
-pub enum TaxCalculationErrorCode {
-    CouldNotFindDeduction,
+    pub tax_deduction_type: TaxDeductionCategory,
+    pub money_to_deduct: Money,
 }
 
 #[derive(Clone)]
@@ -120,7 +117,6 @@ pub struct TaxRegime {
 impl TaxRegime {
     pub fn new(
         brackets: Vec<TaxBracket>,
-        deductions_map: HashMap<TaxDeductionCategory, TaxDeductionRule>,
         currency: Currency,
     ) -> TaxRegime {
         // TODO: Validate currencies
@@ -129,15 +125,23 @@ impl TaxRegime {
         new_brackets.sort_by(|a, b| a.min_money.partial_cmp(&b.min_money).unwrap());
         return TaxRegime {
             brackets: new_brackets,
-            deductions_map: deductions_map,
+            deductions_map: HashMap::new(),
             tax_currency: currency,
         };
+    }
+
+    pub fn set_deduction(
+        &mut self,
+        tax_deduction_category: TaxDeductionCategory,
+        tax_deduction_rule: TaxDeductionRule,
+    ){
+        self.deductions_map.insert(tax_deduction_category, tax_deduction_rule);
     }
 
     fn determine_deductions_amount(
         &self,
         deductions: Vec<TaxDeduction>,
-    ) -> Result<Money, TaxCalculationErrorCode> {
+    ) -> Result<Money, TaxError> {
         deductions
             .iter()
             .try_fold( Money { amount: dec!(0), currency: self.tax_currency } , |acc, actual_tax_deduction| {
@@ -151,7 +155,7 @@ impl TaxRegime {
                             + acc;
                         Ok(money_result)
                     }
-                    None => Err(TaxCalculationErrorCode::CouldNotFindDeduction),
+                    None => Err(TaxError::CouldNotFindDeduction),
                 }
             })
     }
@@ -167,7 +171,7 @@ impl TaxRegime {
         &self,
         income: Money,
         deductions: Vec<TaxDeduction>,
-    ) -> Result<Money, TaxCalculationErrorCode> {
+    ) -> Result<Money, TaxError> {
         let deductions_amount = self.determine_deductions_amount(deductions);
         match deductions_amount {
             Ok(deductions_total) => Ok(self.calculate_tax(income - deductions_total)),
@@ -199,7 +203,7 @@ mod tests {
             rate: dec!(0.3),
         };
 
-        let regime = TaxRegime::new(vec![lowest, middle, highest], hashmap! {}, Currency::CAD);
+        let regime = TaxRegime::new(vec![lowest, middle, highest], Currency::CAD);
 
         let over_highest_tax = regime.calculate_tax(cad_money!(25_000));
         assert_eq!(over_highest_tax, cad_money!(6_500));
@@ -219,7 +223,7 @@ mod tests {
             rate: dec!(0.1),
         };
 
-        let regime = TaxRegime::new(vec![lowest], hashmap! {}, Currency::CAD);
+        let regime = TaxRegime::new(vec![lowest], Currency::CAD);
         let tax = regime.calculate_tax(cad_money!(10_000));
 
         assert_eq!(tax, cad_money!(1000));
@@ -249,11 +253,12 @@ mod tests {
             inclusion_rate: dec!(0.5),
         };
 
-        let regime = TaxRegime::new(
+        let mut regime = TaxRegime::new(
             vec![single],
-            hashmap! { TaxDeductionCategory::CapitalGains => capital_gains_deduction},
             Currency::CAD,
         );
+
+        regime.set_deduction(TaxDeductionCategory::CapitalGains, capital_gains_deduction);
         let actual_deductions = vec![TaxDeduction {
             tax_deduction_type: TaxDeductionCategory::CapitalGains,
             money_to_deduct: cad_money!(5000),
