@@ -118,20 +118,34 @@ pub struct TaxRegime {
 }
 
 impl TaxRegime {
+    fn validate_currency_on_bracket(bracket: &TaxBracket, currency: Currency) -> bool {
+       if let Some(max_money) = bracket.max_money{
+           max_money.currency == currency && bracket.min_money.currency == currency
+       }else{
+           bracket.min_money.currency == currency
+       }
+    }
+
+    fn validate_currency_on_brackets(brackets: Vec<TaxBracket>, currency: Currency) -> bool {
+        brackets.iter().all(|bracket| Self::validate_currency_on_bracket(bracket, currency))
+    }
+
     pub fn new(
         brackets: Vec<TaxBracket>,
         deductions_map: HashMap<TaxDeductionCategory, TaxDeductionRule>,
         currency: Currency,
-    ) -> TaxRegime {
-        // TODO: Validate currencies
-
-        let mut new_brackets = brackets.clone();
-        new_brackets.sort_by(|a, b| a.min_money.partial_cmp(&b.min_money).unwrap());
-        return TaxRegime {
-            brackets: new_brackets,
-            deductions_map: deductions_map,
-            tax_currency: currency,
-        };
+    ) -> Result<TaxRegime, TaxError> {
+        if !Self::validate_currency_on_brackets(brackets.clone(), currency){
+           Err(TaxError::MismatchedCurrencies) 
+        }else{
+            let mut new_brackets = brackets.clone();
+            new_brackets.sort_by(|a, b| a.min_money.partial_cmp(&b.min_money).unwrap());
+            return Ok(TaxRegime {
+                brackets: new_brackets,
+                deductions_map: deductions_map,
+                tax_currency: currency,
+            })
+        }
     }
 
     fn determine_deductions_amount(
@@ -199,7 +213,7 @@ mod tests {
             rate: dec!(0.3),
         };
 
-        let regime = TaxRegime::new(vec![lowest, middle, highest], hashmap! {}, Currency::CAD);
+        let regime = TaxRegime::new(vec![lowest, middle, highest], hashmap! {}, Currency::CAD).unwrap();
 
         let over_highest_tax = regime.calculate_tax(cad_money!(25_000));
         assert_eq!(over_highest_tax, cad_money!(6_500));
@@ -219,7 +233,7 @@ mod tests {
             rate: dec!(0.1),
         };
 
-        let regime = TaxRegime::new(vec![lowest], hashmap! {}, Currency::CAD);
+        let regime = TaxRegime::new(vec![lowest], hashmap! {}, Currency::CAD).unwrap();
         let tax = regime.calculate_tax(cad_money!(10_000));
 
         assert_eq!(tax, cad_money!(1000));
@@ -253,7 +267,7 @@ mod tests {
             vec![single],
             hashmap! { TaxDeductionCategory::CapitalGains => capital_gains_deduction},
             Currency::CAD,
-        );
+        ).unwrap();
         let actual_deductions = vec![TaxDeduction {
             tax_deduction_type: TaxDeductionCategory::CapitalGains,
             money_to_deduct: cad_money!(5000),
