@@ -1,5 +1,6 @@
 use rust_decimal::prelude::*;
 use std::collections::HashMap;
+use std::cmp::Ordering;
 use simple_money::*;
 use rust_decimal_macros::*;
 use thiserror::Error;
@@ -12,11 +13,23 @@ pub enum TaxError {
     CouldNotFindDeduction,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct TaxBracket{
     min_money: Money,
     max_money: Option<Money>,
     rate: Decimal,
+}
+
+impl PartialOrd for TaxBracket {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.min_money.partial_cmp(&other.min_money)
+    }
+}
+
+impl Ord for TaxBracket {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.min_money.cmp(&other.min_money)
+    }
 }
 
 impl TaxBracket {
@@ -81,7 +94,7 @@ pub enum TaxDeductionCategory {
     SalesTax,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct TaxDeductionRule {
     pub tax_deduction_type: TaxDeductionCategory,
     pub max_amount: Option<Money>,
@@ -107,7 +120,7 @@ pub struct TaxDeduction {
     pub money_to_deduct: Money,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct TaxRegime {
     brackets: Vec<TaxBracket>,
     deductions_map: HashMap<TaxDeductionCategory, TaxDeductionRule>,
@@ -135,7 +148,7 @@ impl TaxRegime {
            Err(TaxError::MismatchedCurrencies) 
         }else{
             let mut new_brackets = brackets.clone();
-            new_brackets.sort_by(|a, b| a.min_money.partial_cmp(&b.min_money).unwrap());
+            new_brackets.sort();
             return Ok(TaxRegime {
                 brackets: new_brackets,
                 deductions_map: HashMap::new(),
@@ -244,7 +257,7 @@ mod tests {
     }
 
     #[test]
-    fn invalid_bracket(){
+    fn invalid_bracket_and_regime(){
         let invalid = TaxBracket::new(
             cad_money!(0), 
             Some(usd_money!(1)), 
@@ -252,6 +265,18 @@ mod tests {
         ).unwrap_err();
 
         assert_eq!(invalid, TaxError::MismatchedCurrencies);
+
+        let valid_bracket = TaxBracket::new(
+            cad_money!(0),
+            None,
+            dec!(0.1)
+        ).unwrap();
+        let invalid_regime = TaxRegime::new(
+            vec![valid_bracket],
+            Currency::USD,
+        ).unwrap_err();
+
+        assert_eq!(invalid_regime, TaxError::MismatchedCurrencies);
     }
 
     #[test]
@@ -271,6 +296,10 @@ mod tests {
             vec![single],
             Currency::CAD,
         ).unwrap();
+        regime.set_deduction(
+            TaxDeductionCategory::CapitalGains, 
+            capital_gains_deduction
+        );
         let actual_deductions = vec![TaxDeduction {
             tax_deduction_type: TaxDeductionCategory::CapitalGains,
             money_to_deduct: cad_money!(5000),
