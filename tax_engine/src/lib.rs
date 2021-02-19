@@ -81,17 +81,7 @@ impl TaxBracket {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum TaxDeductionCategory {
     CapitalGains,
-    LowIncome,
-    CommunityFood,
-    Childcare,
-    PoliticalContribution,
-    CoopEducation,
-    ElderlyPublicTransit,
-    ElderlyPropertyTax,
-    TrilliumBenefit,
-    NorthernOntarioEnergy,
-    OntarioEnergyAndPropertyTax,
-    SalesTax,
+    EmployeeStockOptions,
 }
 
 #[derive(Clone, Copy, Debug)]
