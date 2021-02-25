@@ -2,6 +2,5 @@
 members = [
     "tax_engine",
     "finsim",
-    "currency_utils",
     "simple_money",
 ]
