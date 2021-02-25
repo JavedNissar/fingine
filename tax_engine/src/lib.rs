@@ -200,7 +200,6 @@ impl TaxRegime {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use maplit::*;
 
     #[test]
     fn simple_example() {
