@@ -3,6 +3,7 @@ use std::ops::{Add, Sub, Mul};
 use std::cmp::Ordering;
 use rust_decimal::Decimal;
 use thiserror::Error;
+use rust_decimal_macros::*;
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum Currency {
@@ -233,7 +234,6 @@ macro_rules! usd_money {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rust_decimal_macros::*;
 
     macro_rules! assert_rounded_eq {
         ($lhs:expr, $rhs:expr) => {
