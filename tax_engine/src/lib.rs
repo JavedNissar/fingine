@@ -111,13 +111,13 @@ pub struct TaxDeduction {
 }
 
 #[derive(Debug, Clone)]
-pub struct TaxRegime {
+pub struct TaxSchedule {
     brackets: Vec<TaxBracket>,
     deductions_map: HashMap<TaxDeductionCategory, TaxDeductionRule>,
     tax_currency: Currency,
 }
 
-impl TaxRegime {
+impl TaxSchedule {
     fn validate_currency_on_bracket(bracket: &TaxBracket, currency: Currency) -> bool {
        if let Some(max_money) = bracket.max_money{
            max_money.currency == currency && bracket.min_money.currency == currency
@@ -133,13 +133,13 @@ impl TaxRegime {
     pub fn new(
         brackets: Vec<TaxBracket>,
         currency: Currency,
-    ) -> Result<TaxRegime, TaxError> {
+    ) -> Result<TaxSchedule, TaxError> {
         if !Self::validate_currency_on_brackets(brackets.clone(), currency){
            Err(TaxError::MismatchedCurrencies) 
         }else{
             let mut new_brackets = brackets.clone();
             new_brackets.sort();
-            return Ok(TaxRegime {
+            return Ok(TaxSchedule {
                 brackets: new_brackets,
                 deductions_map: HashMap::new(),
                 tax_currency: currency,
@@ -219,15 +219,15 @@ mod tests {
             rate: dec!(0.3),
         };
 
-        let regime = TaxRegime::new(vec![lowest, middle, highest], Currency::CAD).unwrap();
+        let schedule = TaxSchedule::new(vec![lowest, middle, highest], Currency::CAD).unwrap();
 
-        let over_highest_tax = regime.calculate_tax(cad_money!(25_000));
+        let over_highest_tax = schedule.calculate_tax(cad_money!(25_000));
         assert_eq!(over_highest_tax, cad_money!(6_500));
 
-        let middle_tax = regime.calculate_tax(cad_money!(15_000));
+        let middle_tax = schedule.calculate_tax(cad_money!(15_000));
         assert_eq!(middle_tax, cad_money!(2000));
 
-        let lowest_tax = regime.calculate_tax(cad_money!(5_000));
+        let lowest_tax = schedule.calculate_tax(cad_money!(5_000));
         assert_eq!(lowest_tax, cad_money!(500));
     }
 
@@ -239,8 +239,8 @@ mod tests {
             rate: dec!(0.1),
         };
 
-        let regime = TaxRegime::new(vec![lowest], Currency::CAD).unwrap();
-        let tax = regime.calculate_tax(cad_money!(10_000));
+        let schedule = TaxSchedule::new(vec![lowest], Currency::CAD).unwrap();
+        let tax = schedule.calculate_tax(cad_money!(10_000));
 
         assert_eq!(tax, cad_money!(1000));
     }
@@ -260,12 +260,12 @@ mod tests {
             None,
             dec!(0.1)
         ).unwrap();
-        let invalid_regime = TaxRegime::new(
+        let invalid_schedule = TaxSchedule::new(
             vec![valid_bracket],
             Currency::USD,
         ).unwrap_err();
 
-        assert_eq!(invalid_regime, TaxError::MismatchedCurrencies);
+        assert_eq!(invalid_schedule, TaxError::MismatchedCurrencies);
     }
 
     #[test]
@@ -281,11 +281,11 @@ mod tests {
             inclusion_rate: dec!(0.5),
         };
 
-        let mut regime = TaxRegime::new(
+        let mut schedule = TaxSchedule::new(
             vec![single],
             Currency::CAD,
         ).unwrap();
-        regime.set_deduction(
+        schedule.set_deduction(
             TaxDeductionCategory::CapitalGains, 
             capital_gains_deduction
         );
@@ -293,7 +293,7 @@ mod tests {
             tax_deduction_type: TaxDeductionCategory::CapitalGains,
             money_to_deduct: cad_money!(5000),
         }];
-        let tax = regime.calculate_tax_with_deductions(cad_money!(10_000), actual_deductions);
+        let tax = schedule.calculate_tax_with_deductions(cad_money!(10_000), actual_deductions);
 
         match tax {
             Ok(result) => assert_eq!(result, cad_money!(750.00)),
