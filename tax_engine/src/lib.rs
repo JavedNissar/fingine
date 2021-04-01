@@ -85,8 +85,27 @@ pub enum TaxDeductionCategory {
 }
 
 #[derive(Clone, Copy, Debug)]
+<<<<<<< HEAD
+=======
+pub enum ClaimStrategy {
+    ExactAmount(Decimal),
+    Range(Decimal, Decimal),
+    Min(Decimal),
+    Max(Decimal),
+}
+
+#[derive(Clone)]
+pub struct TaxCreditRule{
+    pub refundable: bool,
+    pub tax_credit_identifier: String,
+    pub strategy: ClaimStrategy,
+}
+
+#[derive(Clone, Copy)]
+>>>>>>> de50135 (Add ClaimStrategy and TaxCreditRule)
 pub struct TaxDeductionRule {
     pub tax_deduction_type: TaxDeductionCategory,
+    pub strategy: ClaimStrategy,
     pub max_amount: Option<Money>,
     pub inclusion_rate: Decimal,
 }
