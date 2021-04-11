@@ -231,6 +231,10 @@ macro_rules! usd_money {
     };
 }
 
+pub fn init_zero_amount(currency: Currency) -> Money {
+    Money { amount: dec!(0), currency: currency }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

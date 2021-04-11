@@ -11,6 +11,10 @@ pub enum TaxError {
     MismatchedCurrencies,
     #[error("Could not find deduction")]
     CouldNotFindDeduction,
+    #[error("Could not find credit")]
+    CouldNotFindCredit,
+    #[error("Claim did not match strategy")]
+    ClaimDidNotMatchStrategy
 }
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
@@ -78,62 +82,90 @@ impl TaxBracket {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum TaxDeductionCategory {
-    CapitalGains,
-    EmployeeStockOptions,
-}
-
 #[derive(Clone, Copy, Debug)]
-<<<<<<< HEAD
-=======
 pub enum ClaimStrategy {
-    ExactAmount(Decimal),
-    Range(Decimal, Decimal),
-    Min(Decimal),
-    Max(Decimal),
+    ExactAmount(Money),
+    Range(Money, Money),
+    Min(Money),
+    Max(Money),
 }
 
-#[derive(Clone)]
-pub struct TaxCreditRule{
-    pub refundable: bool,
-    pub tax_credit_identifier: String,
-    pub strategy: ClaimStrategy,
-}
-
-#[derive(Clone, Copy)]
->>>>>>> de50135 (Add ClaimStrategy and TaxCreditRule)
-pub struct TaxDeductionRule {
-    pub tax_deduction_type: TaxDeductionCategory,
-    pub strategy: ClaimStrategy,
-    pub max_amount: Option<Money>,
-    pub inclusion_rate: Decimal,
-}
-
-impl TaxDeductionRule {
-    pub fn apply_deduction(&self, deduction: TaxDeduction) -> Money {
-        if let Some(max_amount) = self.max_amount {
-            if deduction.money_to_deduct <= max_amount {
-                return max_amount * self.inclusion_rate
-            }else{
-                return deduction.money_to_deduct * self.inclusion_rate
-            }
+impl ClaimStrategy {
+    fn is_claim_amount_valid(&self, claim_amount: Money) -> bool {
+        match *self {
+            ClaimStrategy::ExactAmount(exact_amount) => claim_amount == exact_amount,
+            ClaimStrategy::Range(min_amount, max_amount) => claim_amount >= min_amount && claim_amount <= max_amount,
+            ClaimStrategy::Min(min_amount) => claim_amount >= min_amount,
+            ClaimStrategy::Max(max_amount) => claim_amount <= max_amount,
         }
+    }
 
-        return deduction.money_to_deduct * self.inclusion_rate;
+    pub fn apply_claim(&self, claim_amount: Money) -> Result<Money, TaxError> {
+        if self.is_claim_amount_valid(claim_amount) {
+           Ok(claim_amount)
+        } else {
+            Err(TaxError::ClaimDidNotMatchStrategy)
+        }
     }
 }
 
-pub struct TaxDeduction {
-    pub tax_deduction_type: TaxDeductionCategory,
+#[derive(Debug, Clone)]
+pub struct TaxCreditRule{
+    pub refundable: bool,
+    pub tax_credit_identifier: String,
+    pub claim_strategy: ClaimStrategy,
+}
+
+impl TaxCreditRule {
+    pub fn apply_credit(&self, credit_claim: TaxCreditClaim) -> Result<Money, TaxError> {
+       if self.tax_credit_identifier != credit_claim.tax_credit_identifier {
+           return Err(TaxError::CouldNotFindCredit)
+       } 
+
+       self.claim_strategy.apply_claim(credit_claim.money_to_credit)
+    }
+}
+
+#[derive(Clone)]
+pub struct TaxCreditClaim{
+    pub tax_credit_identifier: String,
+    pub money_to_credit: Money,
+}
+
+#[derive(Debug, Clone)]
+pub struct TaxDeductionRule {
+    pub tax_deduction_identifier: String,
+    pub claim_strategy: ClaimStrategy,
+}
+
+impl TaxDeductionRule {
+    pub fn apply_deduction(&self, deduction_claim: TaxDeductionClaim) -> Result<Money, TaxError> {
+        if self.tax_deduction_identifier != deduction_claim.tax_deduction_identifier {
+            return Err(TaxError::CouldNotFindDeduction)
+        }
+
+        self.claim_strategy.apply_claim(deduction_claim.money_to_deduct)
+    }
+}
+
+#[derive(Clone)]
+pub struct TaxDeductionClaim {
+    pub tax_deduction_identifier: String,
     pub money_to_deduct: Money,
 }
 
 #[derive(Debug, Clone)]
 pub struct TaxSchedule {
     brackets: Vec<TaxBracket>,
-    deductions_map: HashMap<TaxDeductionCategory, TaxDeductionRule>,
+    deductions_map: HashMap<String, TaxDeductionRule>,
+    credits_map: HashMap<String, TaxCreditRule>,
     tax_currency: Currency,
+    capital_gains_inclusion_rate: Decimal,
+}
+
+pub enum Income {
+    Employment(Money),
+    CapitalGains(Money),
 }
 
 impl TaxSchedule {
@@ -149,9 +181,25 @@ impl TaxSchedule {
         brackets.iter().all(|bracket| Self::validate_currency_on_bracket(bracket, currency))
     }
 
+    fn determine_income_under_consideration_for_single_income_stream(&self, income: Income) -> Money {
+        match income {
+            Income::CapitalGains(capital_gains_income) => capital_gains_income * self.capital_gains_inclusion_rate,
+            Income::Employment(employment_income) => employment_income,
+        }
+    }
+
+    fn determine_income_to_consider(&self, incomes: Vec<Income>) -> Money {
+       incomes.iter().map(|income| self.determine_income_under_consideration_for_single_income_stream(*income) ).fold(init_zero_amount(self.tax_currency), |acc, money| acc + money)
+    }
+
+    fn determine_taxable_income(&self, income_amount_under_consideration: Money, tax_deduction_claims: Vec<TaxDeductionClaim>) -> Money {
+
+    }
+
     pub fn new(
         brackets: Vec<TaxBracket>,
         currency: Currency,
+        capital_gains_inclusion_rate: Decimal,
     ) -> Result<TaxSchedule, TaxError> {
         if !Self::validate_currency_on_brackets(brackets.clone(), currency){
            Err(TaxError::MismatchedCurrencies) 
@@ -161,17 +209,27 @@ impl TaxSchedule {
             return Ok(TaxSchedule {
                 brackets: new_brackets,
                 deductions_map: HashMap::new(),
+                credits_map: HashMap::new(),
                 tax_currency: currency,
+                capital_gains_inclusion_rate: capital_gains_inclusion_rate,
             })
         }
     }
 
-    pub fn set_deduction(
+    pub fn add_deduction(
         &mut self,
-        tax_deduction_category: TaxDeductionCategory,
+        tax_deduction_identifier: String,
         tax_deduction_rule: TaxDeductionRule,
     ){
-        self.deductions_map.insert(tax_deduction_category, tax_deduction_rule);
+        self.deductions_map.insert(tax_deduction_identifier, tax_deduction_rule);
+    }
+
+    pub fn add_credit(
+        &mut self,
+        tax_credit_identifier: String,
+        tax_credit_rule: TaxCreditRule,
+    ){
+        self.credits_map.insert(tax_credit_identifier, tax_credit_rule);
     }
 
     fn determine_deductions_amount(
