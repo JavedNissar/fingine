@@ -117,7 +117,7 @@ pub struct TaxCreditRule{
 }
 
 impl TaxCreditRule {
-    pub fn apply_credit(&self, credit_claim: TaxCreditClaim) -> Result<Money, TaxError> {
+    pub fn apply_credit(&self, credit_claim: &TaxCreditClaim) -> Result<Money, TaxError> {
        if self.tax_credit_identifier != credit_claim.tax_credit_identifier {
            return Err(TaxError::CouldNotFindCredit)
        } 
@@ -139,7 +139,7 @@ pub struct TaxDeductionRule {
 }
 
 impl TaxDeductionRule {
-    pub fn apply_deduction(&self, deduction_claim: TaxDeductionClaim) -> Result<Money, TaxError> {
+    pub fn apply_deduction(&self, deduction_claim: &TaxDeductionClaim) -> Result<Money, TaxError> {
         if self.tax_deduction_identifier != deduction_claim.tax_deduction_identifier {
             return Err(TaxError::CouldNotFindDeduction)
         }
@@ -163,9 +163,16 @@ pub struct TaxSchedule {
     capital_gains_inclusion_rate: Decimal,
 }
 
+#[derive(Clone,Copy)]
 pub enum Income {
     Employment(Money),
     CapitalGains(Money),
+}
+
+#[derive(Clone,Copy)]
+pub enum TaxCalculation {
+    Refund(Money),
+    Liability(Money),
 }
 
 impl TaxSchedule {
@@ -193,7 +200,57 @@ impl TaxSchedule {
     }
 
     fn determine_taxable_income(&self, income_amount_under_consideration: Money, tax_deduction_claims: Vec<TaxDeductionClaim>) -> Money {
+       let amount_to_deduct = tax_deduction_claims.iter().fold(init_zero_amount(self.tax_currency),|acc,tax_deduction_claim| {
+           let tax_deduction_identifier = &tax_deduction_claim.tax_deduction_identifier;
+           if let Some(tax_deduction) = self.deductions_map.get(tax_deduction_identifier){
+               let deduction_amount = tax_deduction.apply_deduction(tax_deduction_claim).map_or_else(|_| init_zero_amount(self.tax_currency), |v| v);
+               acc + deduction_amount
+           }else{
+               acc
+           }
+       });
+       income_amount_under_consideration - amount_to_deduct
+    }
 
+    fn determine_tax_liability(&self, taxable_income: Money, tax_credit_claims: Vec<TaxCreditClaim>) -> Money {
+        let (refundable_tax_credits, non_refundable_tax_credits): (Vec<(TaxCreditRule, TaxCreditClaim)>, Vec<(TaxCreditRule, TaxCreditClaim)>) = tax_credit_claims.iter().filter_map(|tax_credit_claim|{
+            let tax_credit_identifier = &tax_credit_claim.tax_credit_identifier;
+            if let Some(tax_credit_rule) = self.credits_map.get(tax_credit_identifier) {
+                Some((tax_credit_rule.clone(), tax_credit_claim.clone()))
+            }else{
+                None
+            }
+        }).into_iter().partition(|(tax_credit_rule, _)| tax_credit_rule.refundable);
+
+        let non_refundable_tax_credit_amount = non_refundable_tax_credits.iter().fold(init_zero_amount(self.tax_currency), |acc, (tax_credit_rule, tax_credit_claim)| {
+            let tax_credit_amount = tax_credit_rule.apply_credit(tax_credit_claim).map_or_else(|_| init_zero_amount(self.tax_currency), |v| v);
+            acc + tax_credit_amount 
+        });
+        let refundable_tax_credit_amount = refundable_tax_credits.iter().fold(init_zero_amount(self.tax_currency), |acc, (tax_credit_rule, tax_credit_claim)| {
+            let tax_credit_amount = tax_credit_rule.apply_credit(tax_credit_claim).map_or_else(|_| init_zero_amount(self.tax_currency), |v| v);
+            acc + tax_credit_amount
+        });
+
+        let taxable_income_less_non_refundable_tax_credits = taxable_income - non_refundable_tax_credit_amount;
+
+        if taxable_income_less_non_refundable_tax_credits.amount < dec!(0) {
+            init_zero_amount(self.tax_currency) - refundable_tax_credit_amount
+        }else{
+            taxable_income_less_non_refundable_tax_credits - refundable_tax_credit_amount
+        }
+    }
+
+    pub fn calculate_tax_result(&self, incomes: Vec<Income>, tax_deduction_claims: Vec<TaxDeductionClaim>, tax_credit_claims: Vec<TaxCreditClaim>) -> TaxCalculation {
+        let income_to_consider = self.determine_income_to_consider(incomes);
+        let taxable_income = self.determine_taxable_income(income_to_consider, tax_deduction_claims);
+        let tax_liability = self.determine_tax_liability(taxable_income, tax_credit_claims);
+
+        if tax_liability.amount < dec!(0) {
+            let tax_refund = Money { amount: tax_liability.amount * dec!(-1), currency: tax_liability.currency };
+            TaxCalculation::Refund(tax_refund)
+        } else{
+            TaxCalculation::Liability(tax_liability)
+        }
     }
 
     pub fn new(
@@ -230,47 +287,6 @@ impl TaxSchedule {
         tax_credit_rule: TaxCreditRule,
     ){
         self.credits_map.insert(tax_credit_identifier, tax_credit_rule);
-    }
-
-    fn determine_deductions_amount(
-        &self,
-        deductions: Vec<TaxDeduction>,
-    ) -> Result<Money, TaxError> {
-        deductions
-            .iter()
-            .try_fold( Money { amount: dec!(0), currency: self.tax_currency } , |acc, actual_tax_deduction| {
-                match self
-                    .deductions_map
-                    .get(&actual_tax_deduction.tax_deduction_type)
-                {
-                    Some(deduction_info) => {
-                        let money_result = actual_tax_deduction.money_to_deduct
-                            * deduction_info.inclusion_rate
-                            + acc;
-                        Ok(money_result)
-                    }
-                    None => Err(TaxError::CouldNotFindDeduction),
-                }
-            })
-    }
-
-    pub fn calculate_tax(&self, taxable_income: Money) -> Money {
-        self.brackets
-            .iter()
-            .map(|bracket| bracket.calculate_tax(taxable_income.clone()))
-            .fold(Money { amount: dec!(0), currency: taxable_income.currency }, |acc, bracket_tax| acc + bracket_tax)
-    }
-
-    pub fn calculate_tax_with_deductions(
-        &self,
-        income: Money,
-        deductions: Vec<TaxDeduction>,
-    ) -> Result<Money, TaxError> {
-        let deductions_amount = self.determine_deductions_amount(deductions);
-        match deductions_amount {
-            Ok(deductions_total) => Ok(self.calculate_tax(income - deductions_total)),
-            Err(error_code) => Err(error_code),
-        }
     }
 }
 
