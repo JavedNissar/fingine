@@ -231,6 +231,14 @@ macro_rules! usd_money {
     };
 }
 
+pub fn init_cad_money(amount: Decimal) -> Money {
+    Money { amount: amount, currency: Currency::CAD }
+}
+
+pub fn init_usd_money(amount: Decimal) -> Money {
+    Money { amount: amount, currency: Currency::USD }
+}
+
 pub fn init_zero_amount(currency: Currency) -> Money {
     Money { amount: dec!(0), currency: currency }
 }
