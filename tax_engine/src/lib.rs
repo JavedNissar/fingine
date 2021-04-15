@@ -169,7 +169,7 @@ pub enum Income {
     CapitalGains(Money),
 }
 
-#[derive(Clone,Copy)]
+#[derive(Clone,Copy,Debug,PartialEq,Eq)]
 pub enum TaxCalculation {
     Refund(Money),
     Liability(Money),
@@ -209,7 +209,14 @@ impl TaxSchedule {
                acc
            }
        });
-       income_amount_under_consideration - amount_to_deduct
+
+       let taxable_income = income_amount_under_consideration - amount_to_deduct;
+       
+       if taxable_income.amount < dec!(0) {
+           init_zero_amount(self.tax_currency)
+       }else{
+           taxable_income
+       }
     }
 
     fn determine_tax_liability(&self, taxable_income: Money, tax_credit_claims: Vec<TaxCreditClaim>) -> Money {
@@ -275,18 +282,22 @@ impl TaxSchedule {
 
     pub fn add_deduction(
         &mut self,
-        tax_deduction_identifier: String,
         tax_deduction_rule: TaxDeductionRule,
     ){
-        self.deductions_map.insert(tax_deduction_identifier, tax_deduction_rule);
+        self.deductions_map.insert(
+            tax_deduction_rule.tax_deduction_identifier.clone(), 
+            tax_deduction_rule
+        );
     }
 
     pub fn add_credit(
         &mut self,
-        tax_credit_identifier: String,
         tax_credit_rule: TaxCreditRule,
     ){
-        self.credits_map.insert(tax_credit_identifier, tax_credit_rule);
+        self.credits_map.insert(
+            tax_credit_rule.tax_credit_identifier.clone(), 
+            tax_credit_rule
+        );
     }
 }
 
@@ -295,7 +306,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn simple_example() {
+    fn calculate_tax_without_deductions_and_credits_with_three_brackets() {
         let lowest = TaxBracket {
             min_money: cad_money!(0),
             max_money: Some(cad_money!(10_000)),
@@ -312,34 +323,47 @@ mod tests {
             rate: dec!(0.3),
         };
 
-        let schedule = TaxSchedule::new(vec![lowest, middle, highest], Currency::CAD).unwrap();
+        let schedule = TaxSchedule::new(vec![lowest, middle, highest], Currency::CAD, dec!(0.5)).unwrap();
 
-        let over_highest_tax = schedule.calculate_tax(cad_money!(25_000));
-        assert_eq!(over_highest_tax, cad_money!(6_500));
+        let twenty_five_thousand_employment_income = Income::Employment(cad_money!(25_000));
+        let fifteen_thousand_employment_income = Income::Employment(cad_money!(15_000));
+        let five_thousand_employment_income = Income::Employment(cad_money!(5_000));
+        let five_thousand_capital_gains = Income::CapitalGains(cad_money!(5_000));
 
-        let middle_tax = schedule.calculate_tax(cad_money!(15_000));
-        assert_eq!(middle_tax, cad_money!(2000));
+        let over_highest_tax = schedule.calculate_tax_result(vec![twenty_five_thousand_employment_income], vec![], vec![]);
+        assert_eq!(over_highest_tax, TaxCalculation::Liability(cad_money!(6_500)));
 
-        let lowest_tax = schedule.calculate_tax(cad_money!(5_000));
-        assert_eq!(lowest_tax, cad_money!(500));
+        let over_highest_tax_with_capital_gains = schedule.calculate_tax_result(vec![twenty_five_thousand_employment_income, five_thousand_capital_gains], vec![], vec![]);
+        assert_eq!(over_highest_tax_with_capital_gains, TaxCalculation::Liability(cad_money!(8_000)));
+
+        let middle_tax = schedule.calculate_tax_result(vec![fifteen_thousand_employment_income], vec![], vec![]);
+        assert_eq!(middle_tax, TaxCalculation::Liability(cad_money!(2_000)));
+
+        let lowest_tax = schedule.calculate_tax_result(vec![five_thousand_employment_income], vec![], vec![]);
+        assert_eq!(lowest_tax, TaxCalculation::Liability(cad_money!(500)));
     }
 
     #[test]
-    fn single_bracket_example() {
+    fn calculate_tax_without_deductions_and_credits_with_single_bracket() {
         let lowest = TaxBracket {
             min_money: cad_money!(0),
             max_money: Some(cad_money!(10_000)),
             rate: dec!(0.1),
         };
 
-        let schedule = TaxSchedule::new(vec![lowest], Currency::CAD).unwrap();
-        let tax = schedule.calculate_tax(cad_money!(10_000));
+        let schedule = TaxSchedule::new(vec![lowest], Currency::CAD, dec!(0.5)).unwrap();
+        let employment_income = Income::Employment(cad_money!(10_000));
+        let capital_gains = Income::CapitalGains(cad_money!(10_000));
 
-        assert_eq!(tax, cad_money!(1000));
+        let tax_on_employment_income = schedule.calculate_tax_result(vec![employment_income], vec![], vec![]);
+        let tax_on_capital_gains_and_employment_income = schedule.calculate_tax_result(vec![employment_income, capital_gains], vec![], vec![]);
+
+        assert_eq!(tax_on_employment_income, TaxCalculation::Liability(cad_money!(1000)));
+        assert_eq!(tax_on_capital_gains_and_employment_income, TaxCalculation::Liability(cad_money!(2000)));
     }
 
     #[test]
-    fn invalid_bracket_and_regime(){
+    fn bracket_and_schedule_with_currencies_that_dont_match_fails(){
         let invalid = TaxBracket::new(
             cad_money!(0), 
             Some(usd_money!(1)), 
@@ -356,41 +380,111 @@ mod tests {
         let invalid_schedule = TaxSchedule::new(
             vec![valid_bracket],
             Currency::USD,
+            dec!(0.5),
         ).unwrap_err();
 
         assert_eq!(invalid_schedule, TaxError::MismatchedCurrencies);
     }
 
     #[test]
-    fn deductions_example() {
+    fn single_bracket_with_deduction() {
         let single = TaxBracket {
             min_money: cad_money!(0),
             max_money: None,
             rate: dec!(0.1),
         };
-        let capital_gains_deduction = TaxDeductionRule {
-            tax_deduction_type: TaxDeductionCategory::CapitalGains,
-            max_amount: None,
-            inclusion_rate: dec!(0.5),
+
+        let rrsp_deduction_max = TaxDeductionRule {
+            tax_deduction_identifier: String::from("RRSP_MAX"),
+            claim_strategy: ClaimStrategy::Max(cad_money!(5_000)),
+        };
+        let rrsp_deduction_min = TaxDeductionRule {
+            tax_deduction_identifier: String::from("RRSP_MIN"),
+            claim_strategy: ClaimStrategy::Min(cad_money!(5_000)),
+        };
+        let rrsp_deduction_exact = TaxDeductionRule {
+            tax_deduction_identifier: String::from("RRSP_EXACT"),
+            claim_strategy: ClaimStrategy::ExactAmount(cad_money!(5_000)),
+        };
+        let rrsp_deduction_range = TaxDeductionRule {
+            tax_deduction_identifier: String::from("RRSP_RANGE"),
+            claim_strategy: ClaimStrategy::Range(cad_money!(2_500), cad_money!(5_000)),
         };
 
         let mut schedule = TaxSchedule::new(
             vec![single],
             Currency::CAD,
+            dec!(0.5),
         ).unwrap();
-        schedule.set_deduction(
-            TaxDeductionCategory::CapitalGains, 
-            capital_gains_deduction
-        );
-        let actual_deductions = vec![TaxDeduction {
-            tax_deduction_type: TaxDeductionCategory::CapitalGains,
-            money_to_deduct: cad_money!(5000),
-        }];
-        let tax = schedule.calculate_tax_with_deductions(cad_money!(10_000), actual_deductions);
 
-        match tax {
-            Ok(result) => assert_eq!(result, cad_money!(750.00)),
-            Err(_) => assert!(false, "Tax should not be an Err"),
-        }
+        schedule.add_deduction(rrsp_deduction_max);
+        schedule.add_deduction(rrsp_deduction_min);
+        schedule.add_deduction(rrsp_deduction_exact);
+        schedule.add_deduction(rrsp_deduction_range);
+
+        let valid_max_deduction_claim_at_bound = TaxDeductionClaim { 
+            tax_deduction_identifier: String::from("RRSP_MAX"),
+            money_to_deduct: cad_money!(5_000),
+        };
+        let valid_max_deduction_claim_within = TaxDeductionClaim {
+            tax_deduction_identifier: String::from("RRSP_MAX"),
+            money_to_deduct: cad_money!(2_500),
+        }; 
+        let invalid_max_deduction = TaxDeductionClaim {
+            tax_deduction_identifier: String::from("RRSP_MAX"),
+            money_to_deduct: cad_money!(6_000),
+        };
+
+        let valid_min_deduction_claim_at_bound = TaxDeductionClaim {
+            tax_deduction_identifier: String::from("RRSP_MIN"),
+            money_to_deduct: cad_money!(5_000),
+        };
+        let valid_min_deduction_claim_within = TaxDeductionClaim {
+            tax_deduction_identifier: String::from("RRSP_MIN"),
+            money_to_deduct: cad_money!(6_000),
+        };
+        let invalid_min_deduction = TaxDeductionClaim {
+            tax_deduction_identifier: String::from("RRSP_MIN"),
+            money_to_deduct: cad_money!(2_500),
+        };
+
+        let valid_exact_deduction = TaxDeductionClaim {
+            tax_deduction_identifier: String::from("RRSP_EXACT"),
+            money_to_deduct: cad_money!(5_000),
+        };
+        let invalid_exact_deduction = TaxDeductionClaim {
+            tax_deduction_identifier: String::from("RRSP_EXACT"),
+            money_to_deduct: cad_money!(5_000),
+        };
+
+        let valid_range_deduction_claim_at_min_bound = TaxDeductionClaim {
+            tax_deduction_identifier: String::from("RRSP_RANGE"),
+            money_to_deduct: cad_money!(2_500),
+        };
+        let valid_range_deduction_claim_at_max_bound = TaxDeductionClaim {
+            tax_deduction_identifier: String::from("RRSP_RANGE"),
+            money_to_deduct: cad_money!(5_000),
+        };
+        let valid_range_deduction_claim_within = TaxDeductionClaim {
+            tax_deduction_identifier: String::from("RRSP_RANGE"),
+            money_to_deduct: cad_money!(3_000),
+        };
+        let invalid_range_deduction_claim_past_max = TaxDeductionClaim {
+            tax_deduction_identifier: String::from("RRSP_RANGE"),
+            money_to_deduct: cad_money!(6_000),
+        };
+        let invalid_range_deduction_claim_past_min = TaxDeductionClaim {
+            tax_deduction_identifier: String::from("RRSP_RANGE"),
+            money_to_deduct: cad_money!(1_000),
+        };
+
+        let actual_deduction_claims = vec![
+            TaxDeductionClaim {
+                tax_deduction_identifier: String::from("RRSP"),
+                money_to_deduct: cad_money!(5_000),
+            }
+        ];
+
+        // TODO: Assert various claims with deduction
     }
 }
