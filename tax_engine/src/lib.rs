@@ -387,11 +387,21 @@ mod tests {
     }
 
     #[test]
-    fn single_bracket_with_deduction() {
-        let single = TaxBracket {
+    fn many_bracket_with_deductions_and_credits() {
+        let lowest = TaxBracket {
             min_money: cad_money!(0),
-            max_money: None,
+            max_money: Some(cad_money!(10_000)),
             rate: dec!(0.1),
+        };
+        let middle = TaxBracket {
+            min_money: cad_money!(10_000),
+            max_money: Some(cad_money!(20_000)),
+            rate: dec!(0.2),
+        };
+        let highest = TaxBracket {
+            min_money: cad_money!(20_000),
+            max_money: None,
+            rate: dec!(0.3),
         };
 
         let rrsp_deduction_max = TaxDeductionRule {
@@ -412,7 +422,7 @@ mod tests {
         };
 
         let mut schedule = TaxSchedule::new(
-            vec![single],
+            vec![lowest, middle, highest],
             Currency::CAD,
             dec!(0.5),
         ).unwrap();
@@ -443,16 +453,16 @@ mod tests {
             tax_deduction_identifier: String::from("RRSP_MIN"),
             money_to_deduct: cad_money!(6_000),
         };
-        let invalid_min_deduction = TaxDeductionClaim {
+        let invalid_min_deduction_claim = TaxDeductionClaim {
             tax_deduction_identifier: String::from("RRSP_MIN"),
             money_to_deduct: cad_money!(2_500),
         };
 
-        let valid_exact_deduction = TaxDeductionClaim {
+        let valid_exact_deduction_claim = TaxDeductionClaim {
             tax_deduction_identifier: String::from("RRSP_EXACT"),
             money_to_deduct: cad_money!(5_000),
         };
-        let invalid_exact_deduction = TaxDeductionClaim {
+        let invalid_exact_deduction_claim = TaxDeductionClaim {
             tax_deduction_identifier: String::from("RRSP_EXACT"),
             money_to_deduct: cad_money!(5_000),
         };
@@ -478,13 +488,81 @@ mod tests {
             money_to_deduct: cad_money!(1_000),
         };
 
-        let actual_deduction_claims = vec![
-            TaxDeductionClaim {
-                tax_deduction_identifier: String::from("RRSP"),
-                money_to_deduct: cad_money!(5_000),
-            }
-        ];
+        let employment_income = Income::Employment(cad_money!(25_000));
 
-        // TODO: Assert various claims with deduction
+        let max_at_bound_claim_result = schedule.calculate_tax_result(
+            vec![employment_income], 
+            vec![valid_max_deduction_claim_at_bound], 
+            vec![]
+        ); 
+        let max_within_claim_result = schedule.calculate_tax_result(
+            vec![employment_income],
+            vec![valid_max_deduction_claim_within],
+            vec![],
+        );
+        let invalid_max_claim_result = schedule.calculate_tax_result(
+            vec![employment_income],
+            vec![invalid_max_deduction],
+            vec![],
+        );
+
+        assert_eq!(max_at_bound_claim_result, TaxCalculation::Liability(cad_money!(3_000)));
+        assert_eq!(max_within_claim_result, TaxCalculation::Liability(cad_money!()));
+        assert_eq!(invalid_max_claim_result, )
+
+        let min_at_bound_claim_result = schedule.calculate_tax_result(
+            vec![employment_income],
+            vec![valid_min_deduction_claim_at_bound],
+            vec![],
+        );
+        let min_within_claim_result = schedule.calculate_tax_result(
+            vec![employment_income],
+            vec![valid_min_deduction_claim_within],
+            vec![],
+        );
+        let invalid_min_claim_result = schedule.calculate_tax_result(
+            vec![employment_income],
+            vec![invalid_min_deduction_claim],
+            vec![],
+        );
+
+        let exact_claim_result = schedule.calculate_tax_result(
+            vec![employment_income],
+            vec![valid_exact_deduction_claim],
+            vec![],
+        );
+        let invalid_exact_claim_result = schedule.calculate_tax_result(
+            vec![employment_income],
+            vec![invalid_exact_deduction_claim],
+            vec![],
+        );
+
+        let range_deduction_claim_at_max_bound_result = schedule.calculate_tax_result(
+            vec![employment_income], 
+            vec![valid_range_deduction_claim_at_max_bound], 
+            vec![],
+        );
+        let range_deduction_claim_within_result = schedule.calculate_tax_result(
+            vec![employment_income],
+            vec![valid_range_deduction_claim_within],
+            vec![],
+        );
+        let range_deduction_claim_at_min_bound_result = schedule.calculate_tax_result(
+            vec![employment_income],
+            vec![valid_range_deduction_claim_at_min_bound],
+            vec![],
+        );
+        let invalid_range_deduction_claim_past_min = schedule.calculate_tax_result(
+            vec![employment_income],
+            vec![invalid_range_deduction_claim_past_min],
+            vec![],
+        );
+        let invalid_range_deduction_claim_past_max = schedule.calculate_tax_result(
+            vec![employment_income],
+            vec![invalid_range_deduction_claim_past_max],
+            vec![],
+        );
+
+
     }
 }
