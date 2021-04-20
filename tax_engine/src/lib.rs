@@ -199,27 +199,27 @@ impl TaxSchedule {
        incomes.iter().map(|income| self.determine_income_under_consideration_for_single_income_stream(*income) ).fold(init_zero_amount(self.tax_currency), |acc, money| acc + money)
     }
 
-    fn determine_taxable_income(&self, income_amount_under_consideration: Money, tax_deduction_claims: Vec<TaxDeductionClaim>) -> Money {
-       let amount_to_deduct = tax_deduction_claims.iter().fold(init_zero_amount(self.tax_currency),|acc,tax_deduction_claim| {
+    fn determine_taxable_income(&self, income_amount_under_consideration: Money, tax_deduction_claims: Vec<TaxDeductionClaim>) -> Result<Money, TaxError> {
+        let amount_to_deduct = tax_deduction_claims.iter().try_fold(init_zero_amount(self.tax_currency), |acc, &tax_deduction_claim| {
            let tax_deduction_identifier = &tax_deduction_claim.tax_deduction_identifier;
            if let Some(tax_deduction) = self.deductions_map.get(tax_deduction_identifier){
-               let deduction_amount = tax_deduction.apply_deduction(tax_deduction_claim).map_or_else(|_| init_zero_amount(self.tax_currency), |v| v);
-               acc + deduction_amount
+               let deduction_amount = tax_deduction.apply_deduction(&tax_deduction_claim)?;
+               Ok(acc + deduction_amount)
            }else{
-               acc
+               Ok(acc)
            }
-       });
+        })?;
 
-       let taxable_income = income_amount_under_consideration - amount_to_deduct;
+        let taxable_income = income_amount_under_consideration - amount_to_deduct;
        
        if taxable_income.amount < dec!(0) {
-           init_zero_amount(self.tax_currency)
+           Ok(init_zero_amount(self.tax_currency))
        }else{
-           taxable_income
+           Ok(taxable_income)
        }
     }
 
-    fn determine_tax_liability(&self, taxable_income: Money, tax_credit_claims: Vec<TaxCreditClaim>) -> Money {
+    fn determine_tax_liability_or_refund(&self, taxable_income: Money, tax_credit_claims: Vec<TaxCreditClaim>) -> Result<TaxCalculation, TaxError> {
         let (refundable_tax_credits, non_refundable_tax_credits): (Vec<(TaxCreditRule, TaxCreditClaim)>, Vec<(TaxCreditRule, TaxCreditClaim)>) = tax_credit_claims.iter().filter_map(|tax_credit_claim|{
             let tax_credit_identifier = &tax_credit_claim.tax_credit_identifier;
             if let Some(tax_credit_rule) = self.credits_map.get(tax_credit_identifier) {
@@ -229,35 +229,37 @@ impl TaxSchedule {
             }
         }).into_iter().partition(|(tax_credit_rule, _)| tax_credit_rule.refundable);
 
-        let non_refundable_tax_credit_amount = non_refundable_tax_credits.iter().fold(init_zero_amount(self.tax_currency), |acc, (tax_credit_rule, tax_credit_claim)| {
-            let tax_credit_amount = tax_credit_rule.apply_credit(tax_credit_claim).map_or_else(|_| init_zero_amount(self.tax_currency), |v| v);
-            acc + tax_credit_amount 
-        });
-        let refundable_tax_credit_amount = refundable_tax_credits.iter().fold(init_zero_amount(self.tax_currency), |acc, (tax_credit_rule, tax_credit_claim)| {
-            let tax_credit_amount = tax_credit_rule.apply_credit(tax_credit_claim).map_or_else(|_| init_zero_amount(self.tax_currency), |v| v);
-            acc + tax_credit_amount
-        });
+        let non_refundable_tax_credit_amount = non_refundable_tax_credits.iter().try_fold(init_zero_amount(self.tax_currency), |acc, (tax_credit_rule, tax_credit_claim)| {
+            let tax_credit_amount = tax_credit_rule.apply_credit(tax_credit_claim)?;
+            Ok(acc + tax_credit_amount)
+        })?;
+        let refundable_tax_credit_amount = refundable_tax_credits.iter().try_fold(init_zero_amount(self.tax_currency), |acc, (tax_credit_rule, tax_credit_claim)| {
+            let tax_credit_amount = tax_credit_rule.apply_credit(tax_credit_claim)?;
+            Ok(acc + tax_credit_amount)
+        })?;
 
         let taxable_income_less_non_refundable_tax_credits = taxable_income - non_refundable_tax_credit_amount;
 
         if taxable_income_less_non_refundable_tax_credits.amount < dec!(0) {
-            init_zero_amount(self.tax_currency) - refundable_tax_credit_amount
+            Ok(TaxCalculation::Refund(refundable_tax_credit_amount))
         }else{
-            taxable_income_less_non_refundable_tax_credits - refundable_tax_credit_amount
+            let difference = taxable_income_less_non_refundable_tax_credits.amount - refundable_tax_credit_amount.amount;
+            let abs_diff = difference.abs();
+            let is_liability = difference.is_sign_positive();
+            let money = Money{ amount: abs_diff, currency: self.tax_currency }
+
+            return if is_liability {
+                Ok(TaxCalculation::Liability(money))
+            } else {
+                Ok(TaxCalculation::Refund(money))
+            }
         }
     }
 
-    pub fn calculate_tax_result(&self, incomes: Vec<Income>, tax_deduction_claims: Vec<TaxDeductionClaim>, tax_credit_claims: Vec<TaxCreditClaim>) -> TaxCalculation {
+    pub fn calculate_tax_result(&self, incomes: Vec<Income>, tax_deduction_claims: Vec<TaxDeductionClaim>, tax_credit_claims: Vec<TaxCreditClaim>) -> Result<TaxCalculation, TaxError> {
         let income_to_consider = self.determine_income_to_consider(incomes);
-        let taxable_income = self.determine_taxable_income(income_to_consider, tax_deduction_claims);
-        let tax_liability = self.determine_tax_liability(taxable_income, tax_credit_claims);
-
-        if tax_liability.amount < dec!(0) {
-            let tax_refund = Money { amount: tax_liability.amount * dec!(-1), currency: tax_liability.currency };
-            TaxCalculation::Refund(tax_refund)
-        } else{
-            TaxCalculation::Liability(tax_liability)
-        }
+        let taxable_income = self.determine_taxable_income(income_to_consider, tax_deduction_claims)?;
+        self.determine_tax_liability_or_refund(taxable_income, tax_credit_claims)
     }
 
     pub fn new(
@@ -330,16 +332,16 @@ mod tests {
         let five_thousand_employment_income = Income::Employment(cad_money!(5_000));
         let five_thousand_capital_gains = Income::CapitalGains(cad_money!(5_000));
 
-        let over_highest_tax = schedule.calculate_tax_result(vec![twenty_five_thousand_employment_income], vec![], vec![]);
+        let over_highest_tax = schedule.calculate_tax_result(vec![twenty_five_thousand_employment_income], vec![], vec![]).unwrap();
         assert_eq!(over_highest_tax, TaxCalculation::Liability(cad_money!(6_500)));
 
-        let over_highest_tax_with_capital_gains = schedule.calculate_tax_result(vec![twenty_five_thousand_employment_income, five_thousand_capital_gains], vec![], vec![]);
+        let over_highest_tax_with_capital_gains = schedule.calculate_tax_result(vec![twenty_five_thousand_employment_income, five_thousand_capital_gains], vec![], vec![]).unwrap();
         assert_eq!(over_highest_tax_with_capital_gains, TaxCalculation::Liability(cad_money!(8_000)));
 
-        let middle_tax = schedule.calculate_tax_result(vec![fifteen_thousand_employment_income], vec![], vec![]);
+        let middle_tax = schedule.calculate_tax_result(vec![fifteen_thousand_employment_income], vec![], vec![]).unwrap();
         assert_eq!(middle_tax, TaxCalculation::Liability(cad_money!(2_000)));
 
-        let lowest_tax = schedule.calculate_tax_result(vec![five_thousand_employment_income], vec![], vec![]);
+        let lowest_tax = schedule.calculate_tax_result(vec![five_thousand_employment_income], vec![], vec![]).unwrap();
         assert_eq!(lowest_tax, TaxCalculation::Liability(cad_money!(500)));
     }
 
@@ -355,8 +357,8 @@ mod tests {
         let employment_income = Income::Employment(cad_money!(10_000));
         let capital_gains = Income::CapitalGains(cad_money!(10_000));
 
-        let tax_on_employment_income = schedule.calculate_tax_result(vec![employment_income], vec![], vec![]);
-        let tax_on_capital_gains_and_employment_income = schedule.calculate_tax_result(vec![employment_income, capital_gains], vec![], vec![]);
+        let tax_on_employment_income = schedule.calculate_tax_result(vec![employment_income], vec![], vec![]).unwrap();
+        let tax_on_capital_gains_and_employment_income = schedule.calculate_tax_result(vec![employment_income, capital_gains], vec![], vec![]).unwrap();
 
         assert_eq!(tax_on_employment_income, TaxCalculation::Liability(cad_money!(1000)));
         assert_eq!(tax_on_capital_gains_and_employment_income, TaxCalculation::Liability(cad_money!(2000)));
@@ -494,75 +496,86 @@ mod tests {
             vec![employment_income], 
             vec![valid_max_deduction_claim_at_bound], 
             vec![]
-        ); 
+        ).unwrap(); 
         let max_within_claim_result = schedule.calculate_tax_result(
             vec![employment_income],
             vec![valid_max_deduction_claim_within],
             vec![],
-        );
+        ).unwrap();
         let invalid_max_claim_result = schedule.calculate_tax_result(
             vec![employment_income],
             vec![invalid_max_deduction],
             vec![],
-        );
+        ).unwrap_err();
 
         assert_eq!(max_at_bound_claim_result, TaxCalculation::Liability(cad_money!(3_000)));
-        assert_eq!(max_within_claim_result, TaxCalculation::Liability(cad_money!()));
-        assert_eq!(invalid_max_claim_result, )
+        assert_eq!(max_within_claim_result, TaxCalculation::Liability(cad_money!(3_750)));
+        assert_eq!(invalid_max_claim_result, TaxError::ClaimDidNotMatchStrategy);
 
         let min_at_bound_claim_result = schedule.calculate_tax_result(
             vec![employment_income],
             vec![valid_min_deduction_claim_at_bound],
             vec![],
-        );
+        ).unwrap();
         let min_within_claim_result = schedule.calculate_tax_result(
             vec![employment_income],
             vec![valid_min_deduction_claim_within],
             vec![],
-        );
+        ).unwrap();
         let invalid_min_claim_result = schedule.calculate_tax_result(
             vec![employment_income],
             vec![invalid_min_deduction_claim],
             vec![],
-        );
+        ).unwrap_err();
+
+        assert_eq!(min_at_bound_claim_result, TaxCalculation::Liability(cad_money!(3_000)));
+        assert_eq!(min_within_claim_result, TaxCalculation::Liability(cad_money!(2_800)));
+        assert_eq!(invalid_min_claim_result, TaxError::ClaimDidNotMatchStrategy);
 
         let exact_claim_result = schedule.calculate_tax_result(
             vec![employment_income],
             vec![valid_exact_deduction_claim],
             vec![],
-        );
+        ).unwrap();
         let invalid_exact_claim_result = schedule.calculate_tax_result(
             vec![employment_income],
             vec![invalid_exact_deduction_claim],
             vec![],
-        );
+        ).unwrap_err();
+
+        assert_eq!(exact_claim_result, TaxCalculation::Liability(cad_money!(3_000)));
+        assert_eq!(invalid_exact_claim_result, TaxError::ClaimDidNotMatchStrategy);
 
         let range_deduction_claim_at_max_bound_result = schedule.calculate_tax_result(
             vec![employment_income], 
             vec![valid_range_deduction_claim_at_max_bound], 
             vec![],
-        );
+        ).unwrap();
         let range_deduction_claim_within_result = schedule.calculate_tax_result(
             vec![employment_income],
             vec![valid_range_deduction_claim_within],
             vec![],
-        );
+        ).unwrap();
         let range_deduction_claim_at_min_bound_result = schedule.calculate_tax_result(
             vec![employment_income],
             vec![valid_range_deduction_claim_at_min_bound],
             vec![],
-        );
+        ).unwrap();
         let invalid_range_deduction_claim_past_min = schedule.calculate_tax_result(
             vec![employment_income],
             vec![invalid_range_deduction_claim_past_min],
             vec![],
-        );
+        ).unwrap_err();
         let invalid_range_deduction_claim_past_max = schedule.calculate_tax_result(
             vec![employment_income],
             vec![invalid_range_deduction_claim_past_max],
             vec![],
-        );
+        ).unwrap_err();
 
-
+        assert_eq!(range_deduction_claim_at_max_bound_result, TaxCalculation::Liability(cad_money!(3_000)));
+        assert_eq!(range_deduction_claim_within_result, TaxCalculation::Liability(cad_money!(3_600)));
+        assert_eq!(range_deduction_claim_at_min_bound_result, TaxCalculation::Liability(cad_money!(3_750)));
+        assert_eq!(invalid_range_deduction_claim_past_min, TaxError::ClaimDidNotMatchStrategy);
+        assert_eq!(invalid_range_deduction_claim_past_max, TaxError::ClaimDidNotMatchStrategy);
     }
 }
