@@ -577,5 +577,39 @@ mod tests {
         assert_eq!(range_deduction_claim_at_min_bound_result, TaxCalculation::Liability(cad_money!(3_750)));
         assert_eq!(invalid_range_deduction_claim_past_min, TaxError::ClaimDidNotMatchStrategy);
         assert_eq!(invalid_range_deduction_claim_past_max, TaxError::ClaimDidNotMatchStrategy);
+
+        let non_refundable_full_credit = TaxCreditRule {
+            tax_credit_identifier: String::from("NON_REFUNDABLE_FULL_CREDIT"),
+            claim_strategy: ClaimStrategy::ExactAmount(cad_money!(25_000)),
+            refundable: false,
+        };
+        let refundable_full_credit = TaxCreditRule {
+            tax_credit_identifier: String::from("REFUNDABLE_FULL_CREDIT"),
+            claim_strategy: ClaimStrategy::ExactAmount(cad_money!(25_000)),
+            refundable: true,
+        };
+
+        let non_refundable_full_credit_claim = TaxCreditClaim {
+            tax_credit_identifier: String::from("NON_REFUNDABLE_FULL_CREDIT"),
+            money_to_credit: cad_money!(25_000),
+        };
+        let refundable_full_credit_claim = TaxCreditClaim {
+            tax_credit_identifier: String::from("REFUNDABLE_FULL_CREDIT"),
+            money_to_credit: cad_money!(25_000),
+        };
+
+        let non_refundable_full_credit_claim_result = schedule.calculate_tax_result(
+            vec![employment_income],
+            vec![valid_exact_deduction_claim],
+            vec![non_refundable_full_credit_claim],
+        ).unwrap();
+        let refundable_full_credit_claim_result = schedule.calculate_tax_result(
+            vec![employment_income], 
+            vec![valid_exact_deduction_claim], 
+            vec![refundable_full_credit_claim],
+        ).unwrap();
+        
+        assert_eq!(non_refundable_full_credit_claim_result, TaxCalculation::Liability(cad_money!(0)));
+        assert_eq!(refundable_full_credit_claim_result, TaxCalculation::Refund(cad_money!(5_000)));
     }
 }
