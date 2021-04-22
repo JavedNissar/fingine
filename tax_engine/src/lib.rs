@@ -200,9 +200,9 @@ impl TaxSchedule {
     }
 
     fn determine_taxable_income(&self, income_amount_under_consideration: Money, tax_deduction_claims: Vec<TaxDeductionClaim>) -> Result<Money, TaxError> {
-        let amount_to_deduct = tax_deduction_claims.iter().try_fold(init_zero_amount(self.tax_currency), |acc, &tax_deduction_claim| {
-           let tax_deduction_identifier = &tax_deduction_claim.tax_deduction_identifier;
-           if let Some(tax_deduction) = self.deductions_map.get(tax_deduction_identifier){
+        let amount_to_deduct = tax_deduction_claims.iter().try_fold(init_zero_amount(self.tax_currency), |acc, tax_deduction_claim| {
+           let tax_deduction_identifier = tax_deduction_claim.tax_deduction_identifier.clone();
+           if let Some(tax_deduction) = self.deductions_map.get(&tax_deduction_identifier){
                let deduction_amount = tax_deduction.apply_deduction(&tax_deduction_claim)?;
                Ok(acc + deduction_amount)
            }else{
@@ -246,7 +246,7 @@ impl TaxSchedule {
             let difference = taxable_income_less_non_refundable_tax_credits.amount - refundable_tax_credit_amount.amount;
             let abs_diff = difference.abs();
             let is_liability = difference.is_sign_positive();
-            let money = Money{ amount: abs_diff, currency: self.tax_currency }
+            let money = Money{ amount: abs_diff, currency: self.tax_currency };
 
             return if is_liability {
                 Ok(TaxCalculation::Liability(money))
