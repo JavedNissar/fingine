@@ -534,12 +534,12 @@ mod tests {
 
         let exact_claim_result = schedule.calculate_tax_result(
             vec![employment_income],
-            vec![valid_exact_deduction_claim],
+            vec![valid_exact_deduction_claim.clone()],
             vec![],
         ).unwrap();
         let invalid_exact_claim_result = schedule.calculate_tax_result(
             vec![employment_income],
-            vec![invalid_exact_deduction_claim],
+            vec![invalid_exact_deduction_claim.clone()],
             vec![],
         ).unwrap_err();
 
@@ -600,7 +600,7 @@ mod tests {
 
         let non_refundable_full_credit_claim_result = schedule.calculate_tax_result(
             vec![employment_income],
-            vec![valid_exact_deduction_claim],
+            vec![valid_exact_deduction_claim.clone()],
             vec![non_refundable_full_credit_claim],
         ).unwrap();
         let refundable_full_credit_claim_result = schedule.calculate_tax_result(
