@@ -589,6 +589,9 @@ mod tests {
             refundable: true,
         };
 
+        schedule.add_credit(non_refundable_full_credit);
+        schedule.add_credit(refundable_full_credit);
+
         let non_refundable_full_credit_claim = TaxCreditClaim {
             tax_credit_identifier: String::from("NON_REFUNDABLE_FULL_CREDIT"),
             money_to_credit: cad_money!(25_000),
@@ -608,7 +611,7 @@ mod tests {
             vec![valid_exact_deduction_claim], 
             vec![refundable_full_credit_claim],
         ).unwrap();
-        
+
         assert_eq!(non_refundable_full_credit_claim_result, TaxCalculation::Liability(cad_money!(0)));
         assert_eq!(refundable_full_credit_claim_result, TaxCalculation::Refund(cad_money!(5_000)));
     }
