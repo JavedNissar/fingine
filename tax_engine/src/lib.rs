@@ -219,7 +219,11 @@ impl TaxSchedule {
        }
     }
 
-    fn determine_tax_liability_or_refund(&self, taxable_income: Money, tax_credit_claims: Vec<TaxCreditClaim>) -> Result<TaxCalculation, TaxError> {
+    fn determine_tax_liability(&self, taxable_income: Money) -> Money {
+        self.brackets.iter().map(|bracket| bracket.calculate_tax(taxable_income)).fold(init_zero_amount(self.tax_currency), |acc, tax_liability| acc + tax_liability)
+    }
+
+    fn determine_tax_liability_or_refund(&self, tax_liability: Money, tax_credit_claims: Vec<TaxCreditClaim>) -> Result<TaxCalculation, TaxError> {
         let (refundable_tax_credits, non_refundable_tax_credits): (Vec<(TaxCreditRule, TaxCreditClaim)>, Vec<(TaxCreditRule, TaxCreditClaim)>) = tax_credit_claims.iter().filter_map(|tax_credit_claim|{
             let tax_credit_identifier = &tax_credit_claim.tax_credit_identifier;
             if let Some(tax_credit_rule) = self.credits_map.get(tax_credit_identifier) {
@@ -238,12 +242,12 @@ impl TaxSchedule {
             Ok(acc + tax_credit_amount)
         })?;
 
-        let taxable_income_less_non_refundable_tax_credits = taxable_income - non_refundable_tax_credit_amount;
+        let tax_liability_less_non_refundable_tax_credits = tax_liability - non_refundable_tax_credit_amount;
 
-        if taxable_income_less_non_refundable_tax_credits.amount < dec!(0) {
+        if tax_liability_less_non_refundable_tax_credits.amount < dec!(0) {
             Ok(TaxCalculation::Refund(refundable_tax_credit_amount))
         }else{
-            let difference = taxable_income_less_non_refundable_tax_credits.amount - refundable_tax_credit_amount.amount;
+            let difference = tax_liability_less_non_refundable_tax_credits.amount - refundable_tax_credit_amount.amount;
             let abs_diff = difference.abs();
             let is_liability = difference.is_sign_positive();
             let money = Money{ amount: abs_diff, currency: self.tax_currency };
@@ -259,7 +263,8 @@ impl TaxSchedule {
     pub fn calculate_tax_result(&self, incomes: Vec<Income>, tax_deduction_claims: Vec<TaxDeductionClaim>, tax_credit_claims: Vec<TaxCreditClaim>) -> Result<TaxCalculation, TaxError> {
         let income_to_consider = self.determine_income_to_consider(incomes);
         let taxable_income = self.determine_taxable_income(income_to_consider, tax_deduction_claims)?;
-        self.determine_tax_liability_or_refund(taxable_income, tax_credit_claims)
+        let tax_liability = self.determine_tax_liability(taxable_income);
+        self.determine_tax_liability_or_refund(tax_liability, tax_credit_claims)
     }
 
     pub fn new(
