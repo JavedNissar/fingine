@@ -366,7 +366,26 @@ mod tests {
         let tax_on_capital_gains_and_employment_income = schedule.calculate_tax_result(vec![employment_income, capital_gains], vec![], vec![]).unwrap();
 
         assert_eq!(tax_on_employment_income, TaxCalculation::Liability(cad_money!(1000)));
-        assert_eq!(tax_on_capital_gains_and_employment_income, TaxCalculation::Liability(cad_money!(2000)));
+        assert_eq!(tax_on_capital_gains_and_employment_income, TaxCalculation::Liability(cad_money!(1000)));
+    }
+
+    #[test]
+    fn calculate_tax_without_deductions_and_credits_with_single_bracket_without_max() {
+        let lowest = TaxBracket {
+            min_money: cad_money!(0),
+            max_money: None,
+            rate: dec!(0.1),
+        };
+
+        let schedule = TaxSchedule::new(vec![lowest], Currency::CAD, dec!(0.5)).unwrap();
+        let employment_income = Income::Employment(cad_money!(10_000));
+        let capital_gains = Income::CapitalGains(cad_money!(10_000));
+
+        let tax_on_employment_income = schedule.calculate_tax_result(vec![employment_income], vec![], vec![]).unwrap();
+        let tax_on_capital_gains_and_employment_income = schedule.calculate_tax_result(vec![employment_income, capital_gains], vec![], vec![]).unwrap();
+
+        assert_eq!(tax_on_employment_income, TaxCalculation::Liability(cad_money!(1000)));
+        assert_eq!(tax_on_capital_gains_and_employment_income, TaxCalculation::Liability(cad_money!(1500)));
     }
 
     #[test]
