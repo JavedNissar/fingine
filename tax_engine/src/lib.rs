@@ -490,7 +490,7 @@ mod tests {
         };
         let invalid_exact_deduction_claim = TaxDeductionClaim {
             tax_deduction_identifier: String::from("RRSP_EXACT"),
-            money_to_deduct: cad_money!(5_000),
+            money_to_deduct: cad_money!(5_001),
         };
 
         let valid_range_deduction_claim_at_min_bound = TaxDeductionClaim {
@@ -636,7 +636,7 @@ mod tests {
             vec![refundable_full_credit_claim],
         ).unwrap();
 
-        assert_eq!(non_refundable_full_credit_claim_result, TaxCalculation::Liability(cad_money!(0)));
-        assert_eq!(refundable_full_credit_claim_result, TaxCalculation::Refund(cad_money!(5_000)));
+        assert_eq!(non_refundable_full_credit_claim_result, TaxCalculation::Refund(cad_money!(0)));
+        assert_eq!(refundable_full_credit_claim_result, TaxCalculation::Refund(cad_money!(22_000)));
     }
 }
