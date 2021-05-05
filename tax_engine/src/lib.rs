@@ -72,7 +72,7 @@ impl TaxBracket {
 
         if let Some(max_money) = self.max_money {
             if taxable_income >= max_money {
-                return max_money * self.rate;
+                return (max_money - self.min_money) * self.rate;
             }else{
                 return (taxable_income - self.min_money) * self.rate;
             }
@@ -338,10 +338,10 @@ mod tests {
         let five_thousand_capital_gains = Income::CapitalGains(cad_money!(5_000));
 
         let over_highest_tax = schedule.calculate_tax_result(vec![twenty_five_thousand_employment_income], vec![], vec![]).unwrap();
-        assert_eq!(over_highest_tax, TaxCalculation::Liability(cad_money!(6_500)));
+        assert_eq!(over_highest_tax, TaxCalculation::Liability(cad_money!(4_500)));
 
         let over_highest_tax_with_capital_gains = schedule.calculate_tax_result(vec![twenty_five_thousand_employment_income, five_thousand_capital_gains], vec![], vec![]).unwrap();
-        assert_eq!(over_highest_tax_with_capital_gains, TaxCalculation::Liability(cad_money!(8_000)));
+        assert_eq!(over_highest_tax_with_capital_gains, TaxCalculation::Liability(cad_money!(5_250)));
 
         let middle_tax = schedule.calculate_tax_result(vec![fifteen_thousand_employment_income], vec![], vec![]).unwrap();
         assert_eq!(middle_tax, TaxCalculation::Liability(cad_money!(2_000)));
