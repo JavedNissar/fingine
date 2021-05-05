@@ -308,6 +308,11 @@ impl TaxSchedule {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct TaxRegime {
+    schedules: Vec<TaxSchedule>
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
