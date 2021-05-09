@@ -310,7 +310,28 @@ impl TaxSchedule {
 
 #[derive(Debug, Clone)]
 pub struct TaxRegime {
-    schedules: Vec<TaxSchedule>
+    schedules: HashMap<String, TaxSchedule>,
+    cumulative_tax_liability: HashMap<String, Money>,
+}
+
+impl TaxRegime {
+    pub fn new() -> TaxRegime {
+       TaxRegime { schedules: HashMap::new(), cumulative_tax_liability: HashMap::new() } 
+    }
+
+    pub fn add_schedule(&mut self, schedule_identifier: String, schedule: TaxSchedule){
+        self.schedules.insert(schedule_identifier, schedule);
+        self.cumulative_tax_liability.insert(schedule_identifier, init_zero_amount(schedule.tax_currency));
+    }
+
+
+    fn construct_claims_for_schedule(&self, tax_deduction_claims: Vec<TaxDeductionClaim>, tax_schedule: TaxSchedule) {
+        
+    }
+
+    pub fn calculate_tax(&self, incomes: Vec<Income>, tax_deduction_claims: Vec<TaxDeductionClaim>, tax_credit_claims: Vec<TaxCreditClaim>) -> Money {
+
+    }
 }
 
 #[cfg(test)]
