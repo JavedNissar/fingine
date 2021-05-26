@@ -306,31 +306,63 @@ impl TaxSchedule {
             tax_credit_rule
         );
     }
+
+    pub fn is_deduction_claim_valid(
+        &self,
+        tax_deduction_claim: TaxDeductionClaim,
+    ) -> bool {
+        self.deductions_map.contains_key(&tax_deduction_claim.tax_deduction_identifier)
+    }
+
+    pub fn is_credit_claim_valid(
+        &self,
+        tax_credit_claim: TaxCreditClaim,
+    ) -> bool {
+        self.credits_map.contains_key(&tax_credit_claim.tax_credit_identifier)
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct TaxRegime {
-    schedules: HashMap<String, TaxSchedule>,
-    cumulative_tax_liability: HashMap<String, Money>,
+    schedules: Vec<TaxSchedule>,
 }
 
 impl TaxRegime {
     pub fn new() -> TaxRegime {
-       TaxRegime { schedules: HashMap::new(), cumulative_tax_liability: HashMap::new() } 
+       TaxRegime { schedules: vec![] } 
     }
 
-    pub fn add_schedule(&mut self, schedule_identifier: String, schedule: TaxSchedule){
-        self.schedules.insert(schedule_identifier, schedule);
-        self.cumulative_tax_liability.insert(schedule_identifier, init_zero_amount(schedule.tax_currency));
+    pub fn currency(&self) -> Option<Currency> {
+        if self.schedules.len() > 0 {
+            Some(self.schedules[0].tax_currency)
+        }else{
+            None
+        }
     }
 
-
-    fn construct_claims_for_schedule(&self, tax_deduction_claims: Vec<TaxDeductionClaim>, tax_schedule: TaxSchedule) {
-        
+    pub fn add_schedule(&mut self, schedule: TaxSchedule){
+        self.schedules.push(schedule)
     }
 
-    pub fn calculate_tax(&self, incomes: Vec<Income>, tax_deduction_claims: Vec<TaxDeductionClaim>, tax_credit_claims: Vec<TaxCreditClaim>) -> Money {
+    fn construct_deduction_claims_for_schedule(&self, tax_deduction_claims: Vec<TaxDeductionClaim>, tax_schedule: TaxSchedule) -> Vec<TaxDeductionClaim> {
+       tax_deduction_claims.into_iter().filter(|tax_deduction_claim| tax_schedule.is_deduction_claim_valid(*tax_deduction_claim) ).collect() 
+    }
 
+    fn construct_credit_claims_for_schedule(&self, tax_credit_claims: Vec<TaxCreditClaim>, tax_schedule: TaxSchedule) -> Vec<TaxCreditClaim> {
+        tax_credit_claims.into_iter().filter(|tax_credit_claim| tax_schedule.is_credit_claim_valid(*tax_credit_claim)).collect()
+    }
+
+    pub fn calculate_tax(&self, incomes: Vec<Income>, tax_deduction_claims: Vec<TaxDeductionClaim>, tax_credit_claims: Vec<TaxCreditClaim>) -> Result<Vec<TaxCalculation>, TaxError> {
+        let currency = self.currency().unwrap();
+
+        let tax_calculation_results: Result<Vec<TaxCalculation>,  TaxError> = self.schedules.iter().try_fold(TaxCalculation::Liability(init_zero_amount(currency)),|acc, schedule| {
+            let valid_deduction_claims_for_schedule = self.construct_deduction_claims_for_schedule(tax_deduction_claims, *schedule);
+            let valid_credit_claims_for_schedule = self.construct_credit_claims_for_schedule(tax_credit_claims, *schedule);
+            let tax_calc_result = schedule.calculate_tax_result(incomes, valid_deduction_claims_for_schedule, valid_credit_claims_for_schedule);
+            
+        }).collect();
+
+        let tax_calculation_result = tax_calculation_results.try_fold
     }
 }
 
