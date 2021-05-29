@@ -12,7 +12,7 @@ pub enum Currency {
     USD,
 }
 
-#[derive(Debug,Error)]
+#[derive(PartialEq,Debug,Error)]
 pub enum MoneyError{
     #[error("Could not find exchange rate")]
     CouldNotFindExchangeRate,
@@ -207,6 +207,34 @@ impl Mul<Decimal> for Money {
      fn mul(self, rhs: Decimal) -> Self::Output {
         Self { amount: self.amount * rhs, currency: self.currency }
      }
+}
+
+pub trait CheckedAdd {
+    fn checked_add(&self, other: Self) -> Result<Self, MoneyError> where Self: Sized;
+}
+
+pub trait CheckedSub {
+    fn checked_sub(&self, other: Self) -> Result<Self, MoneyError> where Self: Sized;
+}
+
+impl CheckedAdd for Money {
+    fn checked_add(&self, other: Self) -> Result<Self, MoneyError> {
+        if self.currency != other.currency {
+            return Err(MoneyError::MismatchedCurrencies);
+        }
+
+        Ok(*self + other)
+    }
+}
+
+impl CheckedSub for Money {
+    fn checked_sub(&self, other: Self) -> Result<Self, MoneyError> {
+        if self.currency != other.currency {
+            return Err(MoneyError::MismatchedCurrencies)
+        }
+
+        Ok(*self - other)
+    }
 }
 
 pub trait RoundedEq{
@@ -425,6 +453,9 @@ mod tests {
         let sum_in_cad = exchange.add(first, second, Currency::CAD).unwrap();
         let sum_in_usd = exchange.add(first, second, Currency::USD).unwrap();
 
+        let sum_without_exchange = first.checked_add(second).unwrap_err();
+        assert_eq!(MoneyError::MismatchedCurrencies, sum_without_exchange);
+
         let expected_cad_sum = cad_money!(2.3);
         let expected_usd_sum_amount = dec!(1) * dec!(1)/dec!(1.3) + dec!(1);
         let expected_usd_sum = Money { amount: expected_usd_sum_amount, currency: Currency::USD };
@@ -442,10 +473,14 @@ mod tests {
 
         let sum_in_cad = exchange.add(first, second, Currency::CAD).unwrap();
         let sum_in_usd = exchange.add(first, second, Currency::USD).unwrap();
+        let sum_without_exchange_unchecked = first + second;
+        let sum_without_exchange_checked = first.checked_add(second).unwrap();
 
         let expected_cad_sum = cad_money!(2);
         let expected_usd_sum_amount = dec!(1) * dec!(1)/dec!(1.3) * dec!(2);
         let expected_usd_sum = Money { amount: expected_usd_sum_amount, currency: Currency::USD };
+        assert_eq!(sum_without_exchange_unchecked, expected_cad_sum);
+        assert_eq!(sum_without_exchange_checked, expected_cad_sum);
 
         assert_rounded_eq!(sum_in_cad, expected_cad_sum);
         assert_rounded_eq!(sum_in_usd, expected_usd_sum);
@@ -460,11 +495,13 @@ mod tests {
 
         let diff_in_cad = exchange.sub(first, second, Currency::CAD).unwrap();
         let diff_in_usd = exchange.sub(first, second, Currency::USD).unwrap();
+        let diff_without_exchange = first.checked_sub(second).unwrap_err();
 
         let expected_cad_diff = cad_money!(0.7);
         let expected_usd_diff_amount = dec!(2) * dec!(1)/dec!(1.3) - dec!(1);
         let expected_usd_diff = Money { amount: expected_usd_diff_amount, currency: Currency::USD };
 
+        assert_eq!(diff_without_exchange, MoneyError::MismatchedCurrencies);
         assert_rounded_eq!(diff_in_cad, expected_cad_diff);
         assert_rounded_eq!(diff_in_usd, expected_usd_diff);
     }
@@ -478,6 +515,8 @@ mod tests {
 
         let diff_in_cad = exchange.sub(first, second, Currency::CAD).unwrap();
         let diff_in_usd = exchange.sub(first, second, Currency::USD).unwrap();
+        let diff_without_exchange_checked = first.checked_sub(second).unwrap();
+        let diff_without_exchange_unchecked = first - second;
 
         let expected_cad_diff = cad_money!(1);
         let expected_usd_diff_amount = dec!(1) * dec!(1)/dec!(1.3);
@@ -485,5 +524,7 @@ mod tests {
 
         assert_rounded_eq!(diff_in_cad, expected_cad_diff);
         assert_rounded_eq!(diff_in_usd, expected_usd_diff);
+        assert_eq!(diff_without_exchange_checked, expected_cad_diff);
+        assert_eq!(diff_without_exchange_unchecked, expected_cad_diff);
     }
 }
