@@ -4,6 +4,7 @@ use std::cmp::Ordering;
 use rust_decimal::Decimal;
 use thiserror::Error;
 use rust_decimal_macros::*;
+use std::fmt;
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum Currency {
@@ -23,6 +24,15 @@ pub enum MoneyError{
 pub struct Money {
     pub amount: Decimal,
     pub currency: Currency,
+}
+
+impl fmt::Display for Money {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.currency {
+            Currency::CAD => write!(f, "C${}", self.amount),
+            Currency::USD => write!(f, "US${}", self.amount),
+        }
+    }
 }
 
 #[derive(PartialEq, Eq, Hash)]
@@ -267,6 +277,15 @@ mod tests {
             rate,
         );
         return exchange;
+    }
+
+    #[test]
+    fn can_stringify(){
+        let one_usd = usd_money!(1.00);
+        let one_cad = cad_money!(1.00);
+
+        assert_eq!(one_usd.to_string(), "US$1.00");
+        assert_eq!(one_cad.to_string(), "C$1.00");
     }
 
     #[test]
