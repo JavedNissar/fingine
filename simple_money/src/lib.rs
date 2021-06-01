@@ -12,6 +12,35 @@ pub enum Currency {
     USD,
 }
 
+pub struct CurrencyFormattingInfo {
+    currencyIdentifier: String,
+    monetarySymbol: String,
+    numberOfDecimalPlacesToDisplay: i32,
+    thousandsSeparator: String,
+    decimalSeparator: String,
+}
+
+impl Currency {
+    fn match_currency_to_formatting_info(&self) -> CurrencyFormattingInfo {
+        match self {
+            Currency::CAD => CurrencyFormattingInfo {
+                currencyIdentifier: "C",
+                monetarySymbol: "$",
+                numberOfDecimalPlacesToDisplay: 2,
+                thousandsSeparator: ",",
+                decimalSeparator: ".",
+            },
+            Currency::USD => CurrencyFormattingInfo {
+                currencyIdentifier: "US",
+                monetarySymbol: "$",
+                numberOfDecimalPlacesToDisplay: 2,
+                thousandsSeparator:  ",",
+                decimalSeparator:  "."
+            }
+        }
+    }
+}
+
 #[derive(PartialEq,Debug,Error)]
 pub enum MoneyError{
     #[error("Could not find exchange rate")]
