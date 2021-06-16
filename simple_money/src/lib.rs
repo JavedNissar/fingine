@@ -2,9 +2,11 @@ use std::collections::HashMap;
 use std::ops::{Add, Sub, Mul};
 use std::cmp::Ordering;
 use rust_decimal::Decimal;
+use rust_decimal::prelude::ToPrimitive;
 use thiserror::Error;
 use rust_decimal_macros::*;
 use std::fmt;
+use ::Lotus::*;
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum Currency {
@@ -12,31 +14,29 @@ pub enum Currency {
     USD,
 }
 
-pub struct CurrencyFormattingInfo {
-    currencyIdentifier: String,
-    monetarySymbol: String,
-    numberOfDecimalPlacesToDisplay: i32,
-    thousandsSeparator: String,
-    decimalSeparator: String,
-}
-
 impl Currency {
-    fn match_currency_to_formatting_info(&self) -> CurrencyFormattingInfo {
+    fn match_currency_to_lotus(&self) -> crate::Lotus {
         match self {
-            Currency::CAD => CurrencyFormattingInfo {
-                currencyIdentifier: "C",
-                monetarySymbol: "$",
-                numberOfDecimalPlacesToDisplay: 2,
-                thousandsSeparator: ",",
-                decimalSeparator: ".",
-            },
-            Currency::USD => CurrencyFormattingInfo {
-                currencyIdentifier: "US",
-                monetarySymbol: "$",
-                numberOfDecimalPlacesToDisplay: 2,
-                thousandsSeparator:  ",",
-                decimalSeparator:  "."
-            }
+            Currency::CAD => LotusBuilder::default()
+                .symbol("C$")
+                .precision(2)
+                .format_positive("{symbol}{value}")
+                .format_negative("{symbol}({value})")
+                .format_zero("{symbol}0.00")
+                .decimal_str(".")
+                .thousand_str(" ")
+                .build()
+                .unwrap(),
+            Currency::USD => LotusBuilder::default()
+                .symbol("US$")
+                .precision(2)
+                .format_positive("{symbol}{value}")
+                .format_negative("{symbol}({value})")
+                .format_zero("{symbol}0.00")
+                .decimal_str(".")
+                .thousand_str(" ")
+                .build()
+                .unwrap(),
         }
     }
 }
@@ -57,10 +57,8 @@ pub struct Money {
 
 impl fmt::Display for Money {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.currency {
-            Currency::CAD => write!(f, "C${}", self.amount),
-            Currency::USD => write!(f, "US${}", self.amount),
-        }
+        let formatted = self.currency.match_currency_to_lotus().format(self.amount.to_f64().unwrap());
+        write!(f, "{}", formatted)
     }
 }
 
