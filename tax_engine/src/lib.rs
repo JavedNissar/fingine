@@ -156,6 +156,7 @@ pub struct TaxDeductionClaim {
 
 #[derive(Debug, Clone)]
 pub struct TaxSchedule {
+    identifier: String,
     brackets: Vec<TaxBracket>,
     deductions_map: HashMap<String, TaxDeductionRule>,
     credits_map: HashMap<String, TaxCreditRule>,
@@ -173,6 +174,29 @@ pub enum Income {
 pub enum TaxCalculation {
     Refund(Money),
     Liability(Money),
+}
+
+impl TaxCalculation {
+    fn abs(&self) -> Money {
+        match self {
+            TaxCalculation::Refund(refund_amount) => -1 * refund_money,
+            TaxCalculation::Liability(liability_amount) => liability_money,
+        }
+    }
+}
+
+impl Add for TaxCalculation {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        let sum = self.abs() + other.abs();
+
+        if sum.is_positive() {
+            TaxCalculation::Liability(sum)
+        } else {
+            TaxCalculation::Refund(-1 * sum)
+        }
+    }
 }
 
 impl TaxSchedule {
@@ -268,6 +292,7 @@ impl TaxSchedule {
     }
 
     pub fn new(
+        identifier: &str,
         brackets: Vec<TaxBracket>,
         currency: Currency,
         capital_gains_inclusion_rate: Decimal,
@@ -278,6 +303,7 @@ impl TaxSchedule {
             let mut new_brackets = brackets.clone();
             new_brackets.sort();
             return Ok(TaxSchedule {
+                identifier: identifier.clone(),
                 brackets: new_brackets,
                 deductions_map: HashMap::new(),
                 credits_map: HashMap::new(),
@@ -327,6 +353,11 @@ pub struct TaxRegime {
     schedules: Vec<TaxSchedule>,
 }
 
+struct TaxRegimeCalculationResult {
+    schedule_results: Map<String, TaxCalculation>,
+    total_result: TaxCalculation,
+}
+
 impl TaxRegime {
     pub fn new() -> TaxRegime {
        TaxRegime { schedules: vec![] } 
@@ -352,17 +383,24 @@ impl TaxRegime {
         tax_credit_claims.into_iter().filter(|tax_credit_claim| tax_schedule.is_credit_claim_valid(*tax_credit_claim)).collect()
     }
 
-    pub fn calculate_tax(&self, incomes: Vec<Income>, tax_deduction_claims: Vec<TaxDeductionClaim>, tax_credit_claims: Vec<TaxCreditClaim>) -> Result<Vec<TaxCalculation>, TaxError> {
+    pub fn calculate_tax(&self, incomes: Vec<Income>, tax_deduction_claims: Vec<TaxDeductionClaim>, tax_credit_claims: Vec<TaxCreditClaim>) -> Result<TaxRegimeCalculationResult, TaxError> {
         let currency = self.currency().unwrap();
 
-        let tax_calculation_results: Result<Vec<TaxCalculation>,  TaxError> = self.schedules.iter().try_fold(TaxCalculation::Liability(init_zero_amount(currency)),|acc, schedule| {
+        let tax_calculation_results: Map<String, TaxCalculation> = self.schedules.iter().try_fold(HashMap::new(), |acc, schedule| {
             let valid_deduction_claims_for_schedule = self.construct_deduction_claims_for_schedule(tax_deduction_claims, *schedule);
             let valid_credit_claims_for_schedule = self.construct_credit_claims_for_schedule(tax_credit_claims, *schedule);
-            let tax_calc_result = schedule.calculate_tax_result(incomes, valid_deduction_claims_for_schedule, valid_credit_claims_for_schedule);
-            
-        }).collect();
+            let tax_calc_result = schedule.calculate_tax_result(incomes, valid_deduction_claims_for_schedule, valid_credit_claims_for_schedule)?;
+            acc.insert(schedule.identifier, tax_calc_result)
+        })?;
 
-        let tax_calculation_result = tax_calculation_results.try_fold
+        let tax_calculation_result = tax_calculation_results.into_iter().fold(|acc, (identifier, tax_calc_result)|{
+            acc + tax_calc_result
+        });
+
+        Ok(TaxRegimeCalculationResult {
+            schedule_results: tax_calculation_results,
+            total_result: tax_calculation_result
+        })
     }
 }
 
@@ -388,7 +426,7 @@ mod tests {
             rate: dec!(0.3),
         };
 
-        let schedule = TaxSchedule::new(vec![lowest, middle, highest], Currency::CAD, dec!(0.5)).unwrap();
+        let schedule = TaxSchedule::new("TEST", vec![lowest, middle, highest], Currency::CAD, dec!(0.5)).unwrap();
 
         let twenty_five_thousand_employment_income = Income::Employment(cad_money!(25_000));
         let fifteen_thousand_employment_income = Income::Employment(cad_money!(15_000));
@@ -416,7 +454,7 @@ mod tests {
             rate: dec!(0.1),
         };
 
-        let schedule = TaxSchedule::new(vec![lowest], Currency::CAD, dec!(0.5)).unwrap();
+        let schedule = TaxSchedule::new("TEST", vec![lowest], Currency::CAD, dec!(0.5)).unwrap();
         let employment_income = Income::Employment(cad_money!(10_000));
         let capital_gains = Income::CapitalGains(cad_money!(10_000));
 
@@ -435,7 +473,7 @@ mod tests {
             rate: dec!(0.1),
         };
 
-        let schedule = TaxSchedule::new(vec![lowest], Currency::CAD, dec!(0.5)).unwrap();
+        let schedule = TaxSchedule::new("TEST", vec![lowest], Currency::CAD, dec!(0.5)).unwrap();
         let employment_income = Income::Employment(cad_money!(10_000));
         let capital_gains = Income::CapitalGains(cad_money!(10_000));
 
@@ -462,6 +500,7 @@ mod tests {
             dec!(0.1)
         ).unwrap();
         let invalid_schedule = TaxSchedule::new(
+            "TEST",
             vec![valid_bracket],
             Currency::USD,
             dec!(0.5),
@@ -506,6 +545,7 @@ mod tests {
         };
 
         let mut schedule = TaxSchedule::new(
+            "TEST",
             vec![lowest, middle, highest],
             Currency::CAD,
             dec!(0.5),

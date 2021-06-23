@@ -55,6 +55,12 @@ pub struct Money {
     pub currency: Currency,
 }
 
+impl Money {
+    fn is_positive(&self) -> bool {
+        self.amount > 0
+    }
+}
+
 impl fmt::Display for Money {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let formatted = self.currency.match_currency_to_lotus().format(self.amount.to_f64().unwrap());
@@ -234,6 +240,22 @@ impl Mul<Decimal> for Money {
      fn mul(self, rhs: Decimal) -> Self::Output {
         Self { amount: self.amount * rhs, currency: self.currency }
      }
+}
+
+impl Mul<i64> for Money {
+    type Output = Self;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        Self { amount: self.amount * rhs, currency: self.currency }
+    }
+}
+
+impl Mul<i32> for Money {
+    type Output = Self;
+
+    fn mul(self, rhs: i32) -> Self::Output {
+        Self { amount: self.amount * rhs, currency: self.currency }
+    }
 }
 
 pub trait CheckedAdd {
