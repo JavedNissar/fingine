@@ -57,7 +57,7 @@ pub struct Money {
 
 impl Money {
     fn is_positive(&self) -> bool {
-        self.amount > 0
+        self.amount > dec!(0)
     }
 }
 
@@ -246,7 +246,7 @@ impl Mul<i64> for Money {
     type Output = Self;
 
     fn mul(self, rhs: i64) -> Self::Output {
-        Self { amount: self.amount * rhs, currency: self.currency }
+        Self { amount: self.amount * Decimal::from(rhs), currency: self.currency }
     }
 }
 
@@ -254,7 +254,7 @@ impl Mul<i32> for Money {
     type Output = Self;
 
     fn mul(self, rhs: i32) -> Self::Output {
-        Self { amount: self.amount * rhs, currency: self.currency }
+        Self { amount: self.amount * Decimal::from(rhs), currency: self.currency }
     }
 }
 
@@ -363,6 +363,29 @@ mod tests {
 
         assert_eq!(one_usd.to_string(), "US$1.00");
         assert_eq!(one_cad.to_string(), "C$1.00");
+    }
+
+    #[test]
+    fn can_determine_positivity(){
+        let one_cad = cad_money!(1.00);
+        let zero_cad = cad_money!(0.00);
+        let negative_one_cad = cad_money!(-1.00);
+
+        assert_eq!(one_cad.is_positive(), true);
+        assert_eq!(zero_cad.is_positive(), false);
+        assert_eq!(negative_one_cad.is_positive(), false);
+    }
+
+    #[test]
+    fn can_multiply_by_scalar(){
+        let one_cad = cad_money!(1.00);
+        let ten_cad = one_cad * 10;
+        let negative_one_cad = one_cad * -1;
+        let zero_cad = one_cad * 0;
+
+        assert_eq!(ten_cad,cad_money!(10));
+        assert_eq!(negative_one_cad, cad_money!(-1));
+        assert_eq!(zero_cad, cad_money!(0));
     }
 
     #[test]
