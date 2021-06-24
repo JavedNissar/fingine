@@ -56,7 +56,7 @@ pub struct Money {
 }
 
 impl Money {
-    fn is_positive(&self) -> bool {
+    pub fn is_positive(&self) -> bool {
         self.amount > dec!(0)
     }
 }
