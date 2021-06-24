@@ -4,6 +4,8 @@ use std::cmp::Ordering;
 use simple_money::*;
 use rust_decimal_macros::*;
 use thiserror::Error;
+use std::ops::Add;
+use std::iter::Map;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum TaxError {
@@ -179,8 +181,8 @@ pub enum TaxCalculation {
 impl TaxCalculation {
     fn abs(&self) -> Money {
         match self {
-            TaxCalculation::Refund(refund_amount) => -1 * refund_money,
-            TaxCalculation::Liability(liability_amount) => liability_money,
+            TaxCalculation::Refund(refund_amount) => refund_amount * -1,
+            TaxCalculation::Liability(liability_amount) => liability_amount,
         }
     }
 }
