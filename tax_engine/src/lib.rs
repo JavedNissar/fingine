@@ -181,8 +181,8 @@ pub enum TaxCalculation {
 impl TaxCalculation {
     fn abs(&self) -> Money {
         match self {
-            TaxCalculation::Refund(refund_amount) => refund_amount * -1,
-            TaxCalculation::Liability(liability_amount) => liability_amount,
+            TaxCalculation::Refund(refund_amount) => *refund_amount * dec!(-1),
+            TaxCalculation::Liability(liability_amount) => *liability_amount,
         }
     }
 }
@@ -196,7 +196,7 @@ impl Add for TaxCalculation {
         if sum.is_positive() {
             TaxCalculation::Liability(sum)
         } else {
-            TaxCalculation::Refund(-1 * sum)
+            TaxCalculation::Refund(sum * dec!(-1))
         }
     }
 }
