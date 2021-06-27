@@ -1,11 +1,11 @@
 use rust_decimal::prelude::*;
 use std::collections::HashMap;
 use std::cmp::Ordering;
+use std::iter::FromIterator;
 use simple_money::*;
 use rust_decimal_macros::*;
 use thiserror::Error;
 use std::ops::Add;
-use std::iter::Map;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum TaxError {
@@ -305,7 +305,7 @@ impl TaxSchedule {
             let mut new_brackets = brackets.clone();
             new_brackets.sort();
             return Ok(TaxSchedule {
-                identifier: identifier.clone(),
+                identifier: identifier.to_string(),
                 brackets: new_brackets,
                 deductions_map: HashMap::new(),
                 credits_map: HashMap::new(),
@@ -337,14 +337,14 @@ impl TaxSchedule {
 
     pub fn is_deduction_claim_valid(
         &self,
-        tax_deduction_claim: TaxDeductionClaim,
+        tax_deduction_claim: &TaxDeductionClaim,
     ) -> bool {
         self.deductions_map.contains_key(&tax_deduction_claim.tax_deduction_identifier)
     }
 
     pub fn is_credit_claim_valid(
         &self,
-        tax_credit_claim: TaxCreditClaim,
+        tax_credit_claim: &TaxCreditClaim,
     ) -> bool {
         self.credits_map.contains_key(&tax_credit_claim.tax_credit_identifier)
     }
@@ -355,8 +355,32 @@ pub struct TaxRegime {
     schedules: Vec<TaxSchedule>,
 }
 
-struct TaxRegimeCalculationResult {
-    schedule_results: Map<String, TaxCalculation>,
+impl<'a> FromIterator<&'a TaxDeductionClaim> for Vec<TaxDeductionClaim>{
+    fn from_iter<I: IntoIterator<Item=&'a TaxDeductionClaim>>(iter: I) -> Self {
+        let mut vec: Vec<TaxDeductionClaim> = Vec::new();
+
+        for claim in iter {
+            vec.push(claim.clone());
+        }
+
+        vec
+    }
+}
+
+impl<'a> FromIterator<&'a TaxCreditClaim> for Vec<TaxCreditClaim>{
+    fn from_iter<I: IntoIterator<Item=&'a TaxCreditClaim>>(iter: I) -> Self {
+        let mut vec: Vec<TaxCreditClaim> = Vec::new();
+
+        for claim in iter {
+            vec.push(claim.clone());
+        }
+
+        vec
+    }
+}
+
+pub struct TaxRegimeCalculationResult {
+    schedule_results: HashMap<String, TaxCalculation>,
     total_result: TaxCalculation,
 }
 
@@ -377,25 +401,26 @@ impl TaxRegime {
         self.schedules.push(schedule)
     }
 
-    fn construct_deduction_claims_for_schedule(&self, tax_deduction_claims: Vec<TaxDeductionClaim>, tax_schedule: TaxSchedule) -> Vec<TaxDeductionClaim> {
-       tax_deduction_claims.into_iter().filter(|tax_deduction_claim| tax_schedule.is_deduction_claim_valid(*tax_deduction_claim) ).collect() 
+    fn construct_deduction_claims_for_schedule(&self, tax_deduction_claims: &Vec<TaxDeductionClaim>, tax_schedule: &TaxSchedule) -> Vec<TaxDeductionClaim> {
+       tax_deduction_claims.into_iter().filter(|tax_deduction_claim| tax_schedule.is_deduction_claim_valid(tax_deduction_claim) ).collect() 
     }
 
-    fn construct_credit_claims_for_schedule(&self, tax_credit_claims: Vec<TaxCreditClaim>, tax_schedule: TaxSchedule) -> Vec<TaxCreditClaim> {
-        tax_credit_claims.into_iter().filter(|tax_credit_claim| tax_schedule.is_credit_claim_valid(*tax_credit_claim)).collect()
+    fn construct_credit_claims_for_schedule(&self, tax_credit_claims: &Vec<TaxCreditClaim>, tax_schedule: &TaxSchedule) -> Vec<TaxCreditClaim> {
+        tax_credit_claims.into_iter().filter(|tax_credit_claim| tax_schedule.is_credit_claim_valid(tax_credit_claim)).collect()
     }
 
     pub fn calculate_tax(&self, incomes: Vec<Income>, tax_deduction_claims: Vec<TaxDeductionClaim>, tax_credit_claims: Vec<TaxCreditClaim>) -> Result<TaxRegimeCalculationResult, TaxError> {
         let currency = self.currency().unwrap();
 
-        let tax_calculation_results: Map<String, TaxCalculation> = self.schedules.iter().try_fold(HashMap::new(), |acc, schedule| {
-            let valid_deduction_claims_for_schedule = self.construct_deduction_claims_for_schedule(tax_deduction_claims, *schedule);
-            let valid_credit_claims_for_schedule = self.construct_credit_claims_for_schedule(tax_credit_claims, *schedule);
-            let tax_calc_result = schedule.calculate_tax_result(incomes, valid_deduction_claims_for_schedule, valid_credit_claims_for_schedule)?;
-            acc.insert(schedule.identifier, tax_calc_result)
-        })?;
+        let mut tax_calculation_results: HashMap<String, TaxCalculation> = HashMap::new();
+        for schedule in self.schedules.clone() {
+            let valid_deduction_claims_for_schedule = self.construct_deduction_claims_for_schedule(&tax_deduction_claims, &schedule);
+            let valid_credit_claims_for_schedule = self.construct_credit_claims_for_schedule(&tax_credit_claims, &schedule);
+            let tax_calc_result = schedule.calculate_tax_result(incomes.clone(), valid_deduction_claims_for_schedule, valid_credit_claims_for_schedule)?;
+            tax_calculation_results.insert(schedule.identifier, tax_calc_result);
+        }
 
-        let tax_calculation_result = tax_calculation_results.into_iter().fold(|acc, (identifier, tax_calc_result)|{
+        let tax_calculation_result = tax_calculation_results.clone().into_iter().fold(TaxCalculation::Liability(init_zero_amount(currency)), |acc, (_, tax_calc_result)|{
             acc + tax_calc_result
         });
 
