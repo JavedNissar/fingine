@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::ops::{Add, AddAssign, Mul, Sub};
+use std::ops::{Add, AddAssign, Div, Mul, Sub};
 use std::cmp::Ordering;
 use rust_decimal::Decimal;
 use rust_decimal::prelude::ToPrimitive;
@@ -237,6 +237,14 @@ impl Sub for Money {
         }
 
         Self { amount: self.amount - other.amount, currency: self.currency }
+    }
+}
+
+impl Div<Money> for Money {
+    type Output = Decimal;
+
+    fn div(self, rhs: Money) -> Self::Output {
+       self.amount / rhs.amount 
     }
 }
 
