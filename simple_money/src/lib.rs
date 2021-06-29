@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::ops::{Add, Sub, Mul};
+use std::ops::{Add, AddAssign, Mul, Sub};
 use std::cmp::Ordering;
 use rust_decimal::Decimal;
 use rust_decimal::prelude::ToPrimitive;
@@ -222,6 +222,12 @@ impl Add for Money {
     }
 }
 
+impl AddAssign for Money {
+    fn add_assign(&mut self, other: Self) {
+        *self = *self + other;
+    }
+}
+
 impl Sub for Money {
     type Output = Self;
 
@@ -255,6 +261,23 @@ impl Mul<i32> for Money {
 
     fn mul(self, rhs: i32) -> Self::Output {
         Self { amount: self.amount * Decimal::from(rhs), currency: self.currency }
+    }
+}
+
+pub trait MoneySum<A = Self> {
+    fn sum_of_money<I>(iter: &mut I) -> Self
+    where
+        I: Iterator<Item = A>;
+}
+
+impl MoneySum for Money {
+    fn sum_of_money<I: Iterator<Item = Money>>(iter: &mut I) -> Self {
+        let possible_first_money= iter.next();
+        let mut sum = possible_first_money.map_or(init_zero_amount(Currency::CAD), |money| money);
+        for i in iter {
+            sum += i;
+        }
+        sum
     }
 }
 
