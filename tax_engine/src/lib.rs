@@ -16,7 +16,9 @@ pub enum TaxError {
     #[error("Could not find credit")]
     CouldNotFindCredit,
     #[error("Claim did not match strategy")]
-    ClaimDidNotMatchStrategy
+    ClaimDidNotMatchStrategy,
+    #[error("There are no brackets")]
+    ThereAreNoBrackets
 }
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
@@ -172,6 +174,22 @@ pub enum Income {
     CapitalGains(Money),
 }
 
+impl Income {
+    pub fn currency(&self) -> Currency {
+        match self {
+            Income::Employment(employment_income) => employment_income.currency,
+            Income::CapitalGains(capital_gains_income) => capital_gains_income.currency,
+        }
+    }
+
+    pub fn amount(&self) -> Money {
+        match self {
+            Income::Employment(employment_income) => *employment_income,
+            Income::CapitalGains(capital_gains_income) => *capital_gains_income,
+        }
+    }
+}
+
 #[derive(Clone,Copy,Debug,PartialEq,Eq)]
 pub enum TaxCalculation {
     Refund(Money),
@@ -286,6 +304,28 @@ impl TaxSchedule {
         }
     }
 
+    pub fn determine_marginal_rate(&self, incomes: Vec<Income>, tax_deduction_claims: Vec<TaxDeductionClaim>) -> Result<Decimal, TaxError> {
+        let income_to_consider = self.determine_income_to_consider(incomes);
+        let taxable_income = self.determine_taxable_income(income_to_consider, tax_deduction_claims)?;
+
+        let mut max_tax_bracket: Option<TaxBracket> = None;
+        for bracket in self.brackets.clone() {
+            if let Some(_) = max_tax_bracket {
+                if taxable_income > bracket.min_money {
+                    max_tax_bracket = Some(bracket);
+                }
+            }else{
+                max_tax_bracket = Some(bracket);
+            }
+        }
+
+        if let Some(max_tax_bracket) = max_tax_bracket {
+            Ok(max_tax_bracket.rate)
+        } else {
+            Err(TaxError::ThereAreNoBrackets)
+        }
+    }
+
     pub fn calculate_tax_result(&self, incomes: Vec<Income>, tax_deduction_claims: Vec<TaxDeductionClaim>, tax_credit_claims: Vec<TaxCreditClaim>) -> Result<TaxCalculation, TaxError> {
         let income_to_consider = self.determine_income_to_consider(incomes);
         let taxable_income = self.determine_taxable_income(income_to_consider, tax_deduction_claims)?;
@@ -382,6 +422,8 @@ impl<'a> FromIterator<&'a TaxCreditClaim> for Vec<TaxCreditClaim>{
 pub struct TaxRegimeCalculationResult {
     schedule_results: HashMap<String, TaxCalculation>,
     total_result: TaxCalculation,
+    average_tax_rate: Decimal,
+    marginal_tax_rate: Decimal,
 }
 
 impl TaxRegime {
@@ -413,20 +455,32 @@ impl TaxRegime {
         let currency = self.currency().unwrap();
 
         let mut tax_calculation_results: HashMap<String, TaxCalculation> = HashMap::new();
+        let mut marginal_rates: Vec<Decimal> = vec![];
+
         for schedule in self.schedules.clone() {
             let valid_deduction_claims_for_schedule = self.construct_deduction_claims_for_schedule(&tax_deduction_claims, &schedule);
             let valid_credit_claims_for_schedule = self.construct_credit_claims_for_schedule(&tax_credit_claims, &schedule);
             let tax_calc_result = schedule.calculate_tax_result(incomes.clone(), valid_deduction_claims_for_schedule, valid_credit_claims_for_schedule)?;
-            tax_calculation_results.insert(schedule.identifier, tax_calc_result);
+            tax_calculation_results.insert(schedule.clone().identifier, tax_calc_result);
+            marginal_rates.push(schedule.determine_marginal_rate(incomes.clone(), tax_deduction_claims.clone())?);
         }
 
         let tax_calculation_result = tax_calculation_results.clone().into_iter().fold(TaxCalculation::Liability(init_zero_amount(currency)), |acc, (_, tax_calc_result)|{
             acc + tax_calc_result
         });
 
+        let income_currency = incomes.first().map_or(Currency::CAD, |income| income.currency());
+        let income_amount: Money = simple_money::MoneySum::sum_of_money(&mut incomes.iter().map(|income| income.amount()));
+        let total_income = incomes.iter().fold(init_zero_amount(income_currency), |acc, income|{
+            acc + income.amount()
+        });
+        let marginal_rate = marginal_rates.iter().sum();
+
         Ok(TaxRegimeCalculationResult {
             schedule_results: tax_calculation_results,
-            total_result: tax_calculation_result
+            total_result: tax_calculation_result,
+            average_tax_rate: tax_calculation_result.abs() / total_income,
+            marginal_tax_rate: marginal_rate,
         })
     }
 }
@@ -763,5 +817,61 @@ mod tests {
 
         assert_eq!(non_refundable_full_credit_claim_result, TaxCalculation::Refund(cad_money!(0)));
         assert_eq!(refundable_full_credit_claim_result, TaxCalculation::Refund(cad_money!(22_000)));
+    }
+
+    #[test]
+    fn calculate_regime_with_many_schedules(){
+        let mut regime = TaxRegime::new();
+
+        let lowest_bracket_of_first_schedule = TaxBracket {
+            min_money: cad_money!(0),
+            max_money: Some(cad_money!(10_000)),
+            rate: dec!(0.1),
+        };
+        let middle_bracket_of_first_schedule = TaxBracket {
+            min_money: cad_money!(10_000),
+            max_money: Some(cad_money!(20_000)),
+            rate: dec!(0.2),
+        };
+        let highest_bracket_of_first_schedule = TaxBracket {
+            min_money: cad_money!(20_000),
+            max_money: None,
+            rate: dec!(0.3),
+        };
+
+        let first_schedule = TaxSchedule::new(
+            "FIRST",
+            vec![lowest_bracket_of_first_schedule, middle_bracket_of_first_schedule, highest_bracket_of_first_schedule],
+            Currency::CAD,
+            dec!(0.5),
+        ).unwrap();
+
+        let lowest_bracket_of_second_schedule = TaxBracket {
+            min_money: cad_money!(0),
+            max_money: Some(cad_money!(10_000)),
+            rate: dec!(0.1),
+        };
+        let middle_bracket_of_second_schedule = TaxBracket {
+            min_money: cad_money!(10_000),
+            max_money: Some(cad_money!(20_000)),
+            rate: dec!(0.2),
+        };
+        let highest_bracket_of_second_schedule = TaxBracket {
+            min_money: cad_money!(20_000),
+            max_money: None,
+            rate: dec!(0.3),
+        };
+
+        let second_schedule = TaxSchedule::new(
+            "SECOND",
+            vec![lowest_bracket_of_second_schedule, middle_bracket_of_second_schedule, highest_bracket_of_second_schedule],
+            Currency::CAD,
+            dec!(0.75),
+        ).unwrap();
+
+        regime.add_schedule(first_schedule);
+        regime.add_schedule(second_schedule);
+
+        regime
     }
 }
