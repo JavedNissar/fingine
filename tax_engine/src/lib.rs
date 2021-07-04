@@ -470,7 +470,6 @@ impl TaxRegime {
         });
 
         let income_currency = incomes.first().map_or(Currency::CAD, |income| income.currency());
-        let income_amount: Money = simple_money::MoneySum::sum_of_money(&mut incomes.iter().map(|income| income.amount()));
         let total_income = incomes.iter().fold(init_zero_amount(income_currency), |acc, income|{
             acc + income.amount()
         });
@@ -820,7 +819,7 @@ mod tests {
     }
 
     #[test]
-    fn calculate_regime_with_many_schedules(){
+    fn tax_regime_with_two_schedules(){
         let mut regime = TaxRegime::new();
 
         let lowest_bracket_of_first_schedule = TaxBracket {
@@ -849,17 +848,17 @@ mod tests {
         let lowest_bracket_of_second_schedule = TaxBracket {
             min_money: cad_money!(0),
             max_money: Some(cad_money!(10_000)),
-            rate: dec!(0.1),
+            rate: dec!(0.2),
         };
         let middle_bracket_of_second_schedule = TaxBracket {
             min_money: cad_money!(10_000),
             max_money: Some(cad_money!(20_000)),
-            rate: dec!(0.2),
+            rate: dec!(0.3),
         };
         let highest_bracket_of_second_schedule = TaxBracket {
             min_money: cad_money!(20_000),
             max_money: None,
-            rate: dec!(0.3),
+            rate: dec!(0.4),
         };
 
         let second_schedule = TaxSchedule::new(
@@ -872,6 +871,30 @@ mod tests {
         regime.add_schedule(first_schedule);
         regime.add_schedule(second_schedule);
 
-        regime
+        let employment_income = Income::Employment(cad_money!(25_000));
+        let capital_gains_income = Income::CapitalGains(cad_money!(25_000));
+
+        let calc_result_with_no_cap_gains = regime.calculate_tax(vec![employment_income], vec![], vec![]).unwrap();
+        let calc_result_with_cap_gains = regime.calculate_tax(vec![employment_income, capital_gains_income], vec![], vec![]).unwrap();
+
+        assert_eq!(calc_result_with_no_cap_gains.total_result, TaxCalculation::Liability(cad_money!(16_500)));
+        assert_eq!(calc_result_with_no_cap_gains.marginal_tax_rate, dec!(0.7));
+        assert_eq!(calc_result_with_no_cap_gains.average_tax_rate, dec!(0.66));
+
+        assert_eq!(calc_result_with_cap_gains.total_result, TaxCalculation::Liability(cad_money!(25_250)));
+
+        let middle_employment_income = Income::Employment(cad_money!(15_000));
+        let low_employment_income = Income::Employment(cad_money!(5_000));
+
+        let calc_result_with_middle_income = regime.calculate_tax(vec![middle_employment_income], vec![], vec![]).unwrap();
+        let calc_result_with_low_income = regime.calculate_tax(vec![low_employment_income], vec![], vec![]).unwrap();
+
+        assert_eq!(calc_result_with_middle_income.total_result, TaxCalculation::Liability(cad_money!(5_500)));
+        assert_eq!(calc_result_with_middle_income.marginal_tax_rate, dec!(0.5));
+        assert_eq!(calc_result_with_middle_income.average_tax_rate, dec!(5_500) / dec!(15_000));
+
+        assert_eq!(calc_result_with_low_income.total_result, TaxCalculation::Liability(cad_money!(1_500)));
+        assert_eq!(calc_result_with_low_income.marginal_tax_rate, dec!(0.3));
+        assert_eq!(calc_result_with_low_income.average_tax_rate, dec!(1_500) / dec!(5_000));
     }
 }
