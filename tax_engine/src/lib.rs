@@ -882,6 +882,8 @@ mod tests {
         assert_eq!(calc_result_with_no_cap_gains.average_tax_rate, dec!(0.66));
 
         assert_eq!(calc_result_with_cap_gains.total_result, TaxCalculation::Liability(cad_money!(25_250)));
+        assert_eq!(calc_result_with_cap_gains.marginal_tax_rate, dec!(0.7));
+        assert_eq!(calc_result_with_cap_gains.average_tax_rate, dec!(0.505));
 
         let middle_employment_income = Income::Employment(cad_money!(15_000));
         let low_employment_income = Income::Employment(cad_money!(5_000));
