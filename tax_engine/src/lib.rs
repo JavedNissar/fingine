@@ -877,9 +877,9 @@ mod tests {
         let calc_result_with_no_cap_gains = regime.calculate_tax(vec![employment_income], vec![], vec![]).unwrap();
         let calc_result_with_cap_gains = regime.calculate_tax(vec![employment_income, capital_gains_income], vec![], vec![]).unwrap();
 
-        assert_eq!(calc_result_with_no_cap_gains.total_result, TaxCalculation::Liability(cad_money!(16_500)));
+        assert_eq!(calc_result_with_no_cap_gains.total_result, TaxCalculation::Liability(cad_money!(11_500)));
         assert_eq!(calc_result_with_no_cap_gains.marginal_tax_rate, dec!(0.7));
-        assert_eq!(calc_result_with_no_cap_gains.average_tax_rate, dec!(0.66));
+        assert_eq!(calc_result_with_no_cap_gains.average_tax_rate, dec!(0.46));
 
         assert_eq!(calc_result_with_cap_gains.total_result, TaxCalculation::Liability(cad_money!(25_250)));
         assert_eq!(calc_result_with_cap_gains.marginal_tax_rate, dec!(0.7));
