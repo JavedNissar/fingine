@@ -357,21 +357,21 @@ impl TaxSchedule {
 
     pub fn add_deduction(
         &mut self,
-        tax_deduction_rule: TaxDeductionRule,
+        tax_deduction_rule: &TaxDeductionRule,
     ){
         self.deductions_map.insert(
             tax_deduction_rule.tax_deduction_identifier.clone(), 
-            tax_deduction_rule
+            tax_deduction_rule.clone(),
         );
     }
 
     pub fn add_credit(
         &mut self,
-        tax_credit_rule: TaxCreditRule,
+        tax_credit_rule: &TaxCreditRule,
     ){
         self.credits_map.insert(
             tax_credit_rule.tax_credit_identifier.clone(), 
-            tax_credit_rule
+            tax_credit_rule.clone(),
         );
     }
 
@@ -631,10 +631,10 @@ mod tests {
             dec!(0.5),
         ).unwrap();
 
-        schedule.add_deduction(rrsp_deduction_max);
-        schedule.add_deduction(rrsp_deduction_min);
-        schedule.add_deduction(rrsp_deduction_exact);
-        schedule.add_deduction(rrsp_deduction_range);
+        schedule.add_deduction(&rrsp_deduction_max);
+        schedule.add_deduction(&rrsp_deduction_min);
+        schedule.add_deduction(&rrsp_deduction_exact);
+        schedule.add_deduction(&rrsp_deduction_range);
 
         let valid_max_deduction_claim_at_bound = TaxDeductionClaim { 
             tax_deduction_identifier: String::from("RRSP_MAX"),
@@ -791,8 +791,8 @@ mod tests {
             refundable: true,
         };
 
-        schedule.add_credit(non_refundable_full_credit);
-        schedule.add_credit(refundable_full_credit);
+        schedule.add_credit(&non_refundable_full_credit);
+        schedule.add_credit(&refundable_full_credit);
 
         let non_refundable_full_credit_claim = TaxCreditClaim {
             tax_credit_identifier: String::from("NON_REFUNDABLE_FULL_CREDIT"),
@@ -838,7 +838,7 @@ mod tests {
             rate: dec!(0.3),
         };
 
-        let first_schedule = TaxSchedule::new(
+        let mut first_schedule = TaxSchedule::new(
             "FIRST",
             vec![lowest_bracket_of_first_schedule, middle_bracket_of_first_schedule, highest_bracket_of_first_schedule],
             Currency::CAD,
@@ -861,12 +861,27 @@ mod tests {
             rate: dec!(0.4),
         };
 
-        let second_schedule = TaxSchedule::new(
+        let mut second_schedule = TaxSchedule::new(
             "SECOND",
             vec![lowest_bracket_of_second_schedule, middle_bracket_of_second_schedule, highest_bracket_of_second_schedule],
             Currency::CAD,
             dec!(0.75),
         ).unwrap();
+
+        let tax_deduction_rule = TaxDeductionRule {
+            tax_deduction_identifier: String::from("TEST"),
+            claim_strategy: ClaimStrategy::ExactAmount(cad_money!(5_000)),
+        };
+        let tax_credit_rule = TaxCreditRule {
+            tax_credit_identifier: String::from("TEST"),
+            claim_strategy: ClaimStrategy::ExactAmount(cad_money!(500)),
+            refundable: false,
+        };
+
+        first_schedule.add_deduction(&tax_deduction_rule);
+        first_schedule.add_credit(&tax_credit_rule);
+        second_schedule.add_deduction(&tax_deduction_rule);
+        second_schedule.add_credit(&tax_credit_rule);
 
         regime.add_schedule(first_schedule);
         regime.add_schedule(second_schedule);
@@ -898,5 +913,42 @@ mod tests {
         assert_eq!(calc_result_with_low_income.total_result, TaxCalculation::Liability(cad_money!(1_500)));
         assert_eq!(calc_result_with_low_income.marginal_tax_rate, dec!(0.3));
         assert_eq!(calc_result_with_low_income.average_tax_rate, dec!(1_500) / dec!(5_000));
+
+        let tax_deduction_claim = TaxDeductionClaim {
+            tax_deduction_identifier: String::from("TEST"),
+            money_to_deduct: cad_money!(5_000),
+        };
+        let tax_credit_claim = TaxCreditClaim {
+            tax_credit_identifier: String::from("TEST"),
+            money_to_credit: cad_money!(500),
+        };
+
+        let calc_result_with_deduction = regime.calculate_tax(
+            vec![middle_employment_income],
+            vec![tax_deduction_claim.clone()],
+            vec![],
+        ).unwrap();
+        let calc_result_with_credit = regime.calculate_tax(
+            vec![middle_employment_income], 
+            vec![], 
+            vec![tax_credit_claim.clone()]
+        ).unwrap();
+        let calc_result_with_deduction_and_credit = regime.calculate_tax(
+            vec![middle_employment_income],
+            vec![tax_deduction_claim],
+            vec![tax_credit_claim],
+        ).unwrap();
+
+        assert_eq!(calc_result_with_deduction.total_result, TaxCalculation::Liability(cad_money!(1_500)));
+        assert_eq!(calc_result_with_deduction.marginal_tax_rate, dec!(0.3));
+        assert_eq!(calc_result_with_deduction.average_tax_rate, dec!(1_500) / dec!(15_000));
+
+        assert_eq!(calc_result_with_credit.total_result, TaxCalculation::Liability(cad_money!(5_000)));
+        assert_eq!(calc_result_with_credit.marginal_tax_rate, dec!(0.5));
+        assert_eq!(calc_result_with_credit.average_tax_rate, dec!(5_000) / dec!(15_000));
+
+        assert_eq!(calc_result_with_deduction_and_credit.total_result, TaxCalculation::Liability(cad_money!(1_000)));
+        assert_eq!(calc_result_with_deduction_and_credit.marginal_tax_rate, dec!(0.5));
+        assert_eq!(calc_result_with_deduction_and_credit.average_tax_rate, dec!(1_000) / dec!(15_000));
     }
 }
