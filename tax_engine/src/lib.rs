@@ -939,16 +939,16 @@ mod tests {
             vec![tax_credit_claim],
         ).unwrap();
 
-        assert_eq!(calc_result_with_deduction.total_result, TaxCalculation::Liability(cad_money!(1_500)));
+        assert_eq!(calc_result_with_deduction.total_result, TaxCalculation::Liability(cad_money!(3_000)));
         assert_eq!(calc_result_with_deduction.marginal_tax_rate, dec!(0.3));
-        assert_eq!(calc_result_with_deduction.average_tax_rate, dec!(1_500) / dec!(15_000));
+        assert_eq!(calc_result_with_deduction.average_tax_rate, dec!(3_000) / dec!(15_000));
 
         assert_eq!(calc_result_with_credit.total_result, TaxCalculation::Liability(cad_money!(5_000)));
         assert_eq!(calc_result_with_credit.marginal_tax_rate, dec!(0.5));
         assert_eq!(calc_result_with_credit.average_tax_rate, dec!(5_000) / dec!(15_000));
 
-        assert_eq!(calc_result_with_deduction_and_credit.total_result, TaxCalculation::Liability(cad_money!(1_000)));
+        assert_eq!(calc_result_with_deduction_and_credit.total_result, TaxCalculation::Liability(cad_money!(2_500)));
         assert_eq!(calc_result_with_deduction_and_credit.marginal_tax_rate, dec!(0.5));
-        assert_eq!(calc_result_with_deduction_and_credit.average_tax_rate, dec!(1_000) / dec!(15_000));
+        assert_eq!(calc_result_with_deduction_and_credit.average_tax_rate, dec!(2_500) / dec!(15_000));
     }
 }
