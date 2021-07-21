@@ -272,23 +272,6 @@ impl Mul<i32> for Money {
     }
 }
 
-pub trait MoneySum<A = Self> {
-    fn sum_of_money<I>(iter: &mut I) -> Self
-    where
-        I: Iterator<Item = A>;
-}
-
-impl MoneySum for Money {
-    fn sum_of_money<I: Iterator<Item = Money>>(iter: &mut I) -> Self {
-        let possible_first_money= iter.next();
-        let mut sum = possible_first_money.map_or(init_zero_amount(Currency::CAD), |money| money);
-        for i in iter {
-            sum += i;
-        }
-        sum
-    }
-}
-
 pub trait CheckedAdd {
     fn checked_add(&self, other: Self) -> Result<Self, MoneyError> where Self: Sized;
 }
