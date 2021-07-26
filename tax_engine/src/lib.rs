@@ -901,6 +901,8 @@ mod tests {
         assert_eq!(calc_result_with_cap_gains.total_result, TaxCalculation::Liability(cad_money!(22_750)));
         assert_eq!(calc_result_with_cap_gains.marginal_tax_rate, dec!(0.7));
         assert_eq!(calc_result_with_cap_gains.average_tax_rate, dec!(0.455));
+        assert_eq!(calc_result_with_cap_gains.schedule_results["FIRST"], TaxCalculation::Liability(cad_money!(8_250)));
+        assert_eq!(calc_result_with_cap_gains.schedule_results["SECOND"], TaxCalculation::Liability(cad_money!(12_000)));
 
         let middle_employment_income = Income::Employment(cad_money!(15_000));
         let low_employment_income = Income::Employment(cad_money!(5_000));
