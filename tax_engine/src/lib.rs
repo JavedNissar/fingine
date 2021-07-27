@@ -913,6 +913,8 @@ mod tests {
         assert_eq!(calc_result_with_middle_income.total_result, TaxCalculation::Liability(cad_money!(5_500)));
         assert_eq!(calc_result_with_middle_income.marginal_tax_rate, dec!(0.5));
         assert_eq!(calc_result_with_middle_income.average_tax_rate, dec!(5_500) / dec!(15_000));
+        assert_eq!(calc_result_with_middle_income.schedule_results["FIRST"], TaxCalculation::Liability(cad_money!(2_000)));
+        assert_eq!(calc_result_with_middle_income.schedule_results["SECOND"], TaxCalculation::Liability(cad_money!(3_500)));
 
         assert_eq!(calc_result_with_low_income.total_result, TaxCalculation::Liability(cad_money!(1_500)));
         assert_eq!(calc_result_with_low_income.marginal_tax_rate, dec!(0.3));
