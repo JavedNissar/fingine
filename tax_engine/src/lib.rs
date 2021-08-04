@@ -878,8 +878,21 @@ mod tests {
             refundable: false,
         };
 
+        let tax_deduction_rule_only_for_first = TaxDeductionRule {
+            tax_deduction_identifier: String::from("TEST_ONLY_FOR_FIRST"),
+            claim_strategy: ClaimStrategy::ExactAmount(cad_money!(1_000)),
+        };
+        let tax_credit_rule_only_for_first = TaxCreditRule {
+            tax_credit_identifier: String::from("TEST_ONLY_FOR_SECOND"),
+            claim_strategy: ClaimStrategy::ExactAmount(cad_money!(100)),
+            refundable: false,
+        };
+
         first_schedule.add_deduction(&tax_deduction_rule);
         first_schedule.add_credit(&tax_credit_rule);
+        first_schedule.add_deduction(&tax_deduction_rule_only_for_first);
+        first_schedule.add_credit(&tax_credit_rule_only_for_first);
+
         second_schedule.add_deduction(&tax_deduction_rule);
         second_schedule.add_credit(&tax_credit_rule);
 
@@ -931,6 +944,15 @@ mod tests {
             money_to_credit: cad_money!(500),
         };
 
+        let tax_deduction_claim_on_first_schedule_only = TaxDeductionClaim {
+            tax_deduction_identifier: String::from("TEST_ONLY_FOR_FIRST"),
+            money_to_deduct: cad_money!(1_000),
+        };
+        let tax_credit_claim_on_first_schedule_only = TaxCreditClaim {
+            tax_credit_identifier: String::from("TEST_ONLY_FOR_FIRST"),
+            money_to_credit: cad_money(100),
+        };
+
         let calc_result_with_deduction = regime.calculate_tax(
             vec![middle_employment_income],
             vec![tax_deduction_claim.clone()],
@@ -964,5 +986,21 @@ mod tests {
         assert_eq!(calc_result_with_deduction_and_credit.average_tax_rate, dec!(2_500) / dec!(15_000));
         assert_eq!(calc_result_with_deduction_and_credit.schedule_results["FIRST"], TaxCalculation::Liability(cad_money!(500)));
         assert_eq!(calc_result_with_deduction_and_credit.schedule_results["SECOND"], TaxCalculation::Liability(cad_money!(1_500)));
+
+        let calc_result_with_deduction_only_on_first_schedule = regime.calculate_tax(
+            vec![middle_employment_income],
+            vec![tax_deduction_claim_on_first_schedule_only.clone()],
+            vec![],
+        ).unwrap();
+        let calc_result_with_credit_only_on_first_schedule = regime.calculate_tax(
+            vec![middle_employment_income],
+            vec![],
+            vec![tax_credit_claim_on_first_schedule_only.clone()],
+        ).unwrap();
+        let calc_result_with_deduction_only_on_first_schedule = regime.calculate_tax(
+            vec![middle_employment_income],
+            vec![tax_deduction_claim_on_first_schedule_only],
+            vec![tax_credit_claim_on_first_schedule_only],
+        ).unwrap();
     }
 }
