@@ -16,6 +16,6 @@ Finsim is a Rust library that intends to provide personal finance simulation cap
 # Roadmap
 
 A useful framing I uncovered while thinking about what I would like this project to achieve is what questions do I hope to help people (and myself) answer 
-this year. For 2021, I would like to help folks answer the following questions:
+this year. For 2021, I would like to help folks answer the following question:
 
 * When given two job offers in Canada, how can someone figure out which one is better from the perspective of increasing their net worth over the amount of time they expect to be in that job?
