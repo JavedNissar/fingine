@@ -950,7 +950,7 @@ mod tests {
         };
         let tax_credit_claim_on_first_schedule_only = TaxCreditClaim {
             tax_credit_identifier: String::from("TEST_ONLY_FOR_FIRST"),
-            money_to_credit: cad_money(100),
+            money_to_credit: cad_money!(100),
         };
 
         let calc_result_with_deduction = regime.calculate_tax(
@@ -997,10 +997,29 @@ mod tests {
             vec![],
             vec![tax_credit_claim_on_first_schedule_only.clone()],
         ).unwrap();
-        let calc_result_with_deduction_only_on_first_schedule = regime.calculate_tax(
+        let calc_result_with_deduction_and_credit_only_on_first_schedule = regime.calculate_tax(
             vec![middle_employment_income],
             vec![tax_deduction_claim_on_first_schedule_only],
             vec![tax_credit_claim_on_first_schedule_only],
         ).unwrap();
+
+        assert_eq!(calc_result_with_deduction_only_on_first_schedule.total_result, TaxCalculation::Liability(cad_money!(5_300)));
+        assert_eq!(calc_result_with_deduction_only_on_first_schedule.marginal_tax_rate, dec!(0.5));
+        assert_eq!(calc_result_with_deduction_only_on_first_schedule.average_tax_rate, dec!(0.35));
+        assert_eq!(calc_result_with_deduction_only_on_first_schedule.schedule_results["FIRST"], TaxCalculation::Liability(cad_money!(1_800)));
+        assert_eq!(calc_result_with_deduction_only_on_first_schedule.schedule_results["SECOND"], TaxCalculation::Liability(cad_money!(3_500)));
+        
+        assert_eq!(calc_result_with_credit_only_on_first_schedule.total_result, TaxCalculation::Liability(cad_money!(5_400)));
+        assert_eq!(calc_result_with_credit_only_on_first_schedule.marginal_tax_rate, dec!(0.5));
+        assert_eq!(calc_result_with_credit_only_on_first_schedule.average_tax_rate, dec!(0.36));
+        assert_eq!(calc_result_with_credit_only_on_first_schedule.schedule_results["FIRST"], TaxCalculation::Liability(cad_money!(1_900)));
+        assert_eq!(calc_result_with_credit_only_on_first_schedule.schedule_results["SECOND"], TaxCalculation::Liability(cad_money!(3_500)));
+
+        assert_eq!(calc_result_with_deduction_and_credit_only_on_first_schedule.total_result, TaxCalculation::Liability(cad_money!(5_200)));
+        assert_eq!(calc_result_with_deduction_and_credit_only_on_first_schedule.marginal_tax_rate, dec!(0.5));
+        assert_eq!(calc_result_with_credit_only_on_first_schedule.average_tax_rate, dec!(0.34));
+        assert_eq!(calc_result_with_deduction_and_credit_only_on_first_schedule.schedule_results["FIRST"], TaxCalculation::Liability(cad_money!(1_700)));
+        assert_eq!(calc_result_with_deduction_and_credit_only_on_first_schedule.schedule_results["SECOND"], TaxCalculation::Liability(cad_money!(3_500)));
+
     }
 }
