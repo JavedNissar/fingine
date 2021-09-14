@@ -983,9 +983,9 @@ mod tests {
         assert_eq!(calc_result_with_credit.schedule_results["FIRST"], TaxCalculation::Liability(cad_money!(1_500)));
         assert_eq!(calc_result_with_credit.schedule_results["SECOND"], TaxCalculation::Liability(cad_money!(3_000)));
 
-        assert_eq!(calc_result_with_deduction_and_credit.total_result, TaxCalculation::Liability(cad_money!(2_500)));
-        assert_eq!(calc_result_with_deduction_and_credit.marginal_tax_rate, dec!(0.5));
-        assert_eq!(calc_result_with_deduction_and_credit.average_tax_rate, dec!(2_500) / dec!(15_000));
+        assert_eq!(calc_result_with_deduction_and_credit.total_result, TaxCalculation::Liability(cad_money!(2_000)));
+        assert_eq!(calc_result_with_deduction_and_credit.marginal_tax_rate, dec!(0.3));
+        assert_eq!(calc_result_with_deduction_and_credit.average_tax_rate, dec!(2_000) / dec!(15_000));
         assert_eq!(calc_result_with_deduction_and_credit.schedule_results["FIRST"], TaxCalculation::Liability(cad_money!(500)));
         assert_eq!(calc_result_with_deduction_and_credit.schedule_results["SECOND"], TaxCalculation::Liability(cad_money!(1_500)));
 
