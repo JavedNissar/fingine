@@ -1,45 +1,15 @@
+mod currency;
+
 use std::collections::HashMap;
 use std::ops::{Add, AddAssign, Div, Mul, Sub};
 use std::cmp::Ordering;
+use currency::Currency;
 use rust_decimal::Decimal;
 use rust_decimal::prelude::ToPrimitive;
 use thiserror::Error;
 use rust_decimal_macros::*;
 use std::fmt;
 use ::Lotus::*;
-
-#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
-pub enum Currency {
-    CAD,
-    USD,
-}
-
-impl Currency {
-    fn match_currency_to_lotus(&self) -> crate::Lotus {
-        match self {
-            Currency::CAD => LotusBuilder::default()
-                .symbol("C$")
-                .precision(2)
-                .format_positive("{symbol}{value}")
-                .format_negative("{symbol}({value})")
-                .format_zero("{symbol}0.00")
-                .decimal_str(".")
-                .thousand_str(" ")
-                .build()
-                .unwrap(),
-            Currency::USD => LotusBuilder::default()
-                .symbol("US$")
-                .precision(2)
-                .format_positive("{symbol}{value}")
-                .format_negative("{symbol}({value})")
-                .format_zero("{symbol}0.00")
-                .decimal_str(".")
-                .thousand_str(" ")
-                .build()
-                .unwrap(),
-        }
-    }
-}
 
 #[derive(PartialEq,Debug,Error)]
 pub enum MoneyError{
