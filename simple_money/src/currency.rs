@@ -1,7 +1,7 @@
 use Lotus::LotusBuilder;
 
 struct CurrencyData {
-    exponent: u32,
+    exponent: u8,
     locale: Locale,
     minor_units: u64,
     name: &'static str,
@@ -1908,14 +1908,14 @@ impl Currency {
            match currency_data.locale{
                Locale::USA | Locale::India | Locale::Sweden => lotus_builder.format_zero("{symbol}0.00"),
                Locale::EU => lotus_builder.format_zero("{symbol}0,00"),
-           }
+           };
        } else {
            lotus_builder.format_positive("{value}{symbol}");
            lotus_builder.format_negative("{value}{symbol}");
            match currency_data.locale{
                Locale::USA | Locale::India | Locale::Sweden => lotus_builder.format_zero("0.00{symbol}"),
                Locale::EU => lotus_builder.format_zero("0,00{symbol}")
-           }
+           };
        }
 
        match currency_data.locale{

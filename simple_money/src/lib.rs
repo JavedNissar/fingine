@@ -33,7 +33,7 @@ impl Money {
 
 impl fmt::Display for Money {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let formatted = self.currency.match_currency_to_lotus().format(self.amount.to_f64().unwrap());
+        let formatted = self.currency.match_currency_to_lotus().unwrap().format(self.amount.to_f64().unwrap());
         write!(f, "{}", formatted)
     }
 }
@@ -353,22 +353,18 @@ mod tests {
     fn can_determine_positivity(){
         let one_cad = cad_money!(1.00);
         let zero_cad = cad_money!(0.00);
-        let negative_one_cad = cad_money!(-1.00);
 
         assert_eq!(one_cad.is_positive(), true);
         assert_eq!(zero_cad.is_positive(), false);
-        assert_eq!(negative_one_cad.is_positive(), false);
     }
 
     #[test]
     fn can_multiply_by_scalar(){
         let one_cad = cad_money!(1.00);
         let ten_cad = one_cad * 10;
-        let negative_one_cad = one_cad * -1;
         let zero_cad = one_cad * 0;
 
         assert_eq!(ten_cad,cad_money!(10));
-        assert_eq!(negative_one_cad, cad_money!(-1));
         assert_eq!(zero_cad, cad_money!(0));
     }
 
