@@ -5,7 +5,7 @@ Fingine is a personal financial simulation engine that is intended to enable fol
 # Principles
 
 1. Emphasize geographic and temporal flexibility with all features 
-2. Provide a reasonably easy scripting environment
+2. Provide a reasonably easy environment to work in for scripting financial planning scenarios
 3. Emphasize performance in order to enable folks to iterate on their scripts quickly
 
 # Components
