@@ -12,8 +12,9 @@ struct CurrencyData {
 enum Locale {
     USA,
     EU,
+    // TODO: Separate digits for India based on Indian numbering system
     India,
-    Sweden,
+    Poland,
 }
 
 const aed_currency_data: CurrencyData =  CurrencyData {
@@ -225,7 +226,7 @@ const bwp_currency_data: CurrencyData = CurrencyData{
 
 const byn_currency_data: CurrencyData = CurrencyData {
     exponent: 2,
-    locale: Locale::Sweden,
+    locale: Locale::Poland,
     minor_units: 1,
     name: "Belarusian Ruble",
     symbol: "Br",
@@ -234,7 +235,7 @@ const byn_currency_data: CurrencyData = CurrencyData {
 
 const byr_currency_data: CurrencyData = CurrencyData{
     exponent: 0,
-    locale: Locale::Sweden,
+    locale: Locale::Poland,
     minor_units: 100,
     name: "Belarusian Ruble",
     symbol: "Br",
@@ -351,7 +352,7 @@ const cve_currency_data: CurrencyData = CurrencyData {
 
 const czk_currency_data: CurrencyData = CurrencyData {
     exponent: 2,
-    locale: Locale::Sweden,
+    locale: Locale::Poland,
     minor_units: 100,
     name: "Czech Koruna",
     symbol: "Kč",
@@ -549,7 +550,7 @@ const htg_currency_data: CurrencyData = CurrencyData{
 
 const huf_currency_data: CurrencyData = CurrencyData {
     exponent: 2,
-    locale: Locale::Sweden,
+    locale: Locale::Poland,
     minor_units: 5,
     name: "Hungarian Forint",
     symbol: "Ft",
@@ -991,7 +992,7 @@ const pkr_currency_data: CurrencyData = CurrencyData{
 
 const pln_currency_data: CurrencyData = CurrencyData{
     exponent: 2,
-    locale: Locale::Sweden,
+    locale: Locale::Poland,
     minor_units: 1,
     name: "Polish Złoty",
     symbol: "zł",
@@ -1000,7 +1001,7 @@ const pln_currency_data: CurrencyData = CurrencyData{
 
 const pyg_currency_data: CurrencyData = CurrencyData {
     exponent: 0,
-    locale: Locale::Sweden,
+    locale: Locale::Poland,
     minor_units: 5000,
     name: "Paraguayan Guaraní",
     symbol: "₲",
@@ -1009,7 +1010,7 @@ const pyg_currency_data: CurrencyData = CurrencyData {
 
 const qar_currency_data: CurrencyData = CurrencyData{
     exponent: 2,
-    locale: Locale::Sweden,
+    locale: Locale::Poland,
     minor_units: 1,
     name: "Qatari Riyal",
     symbol: "ر.ق",
@@ -1090,7 +1091,7 @@ const sdg_currency_data: CurrencyData = CurrencyData{
 
 const sek_currency_data: CurrencyData = CurrencyData{
     exponent: 2,
-    locale: Locale::Sweden,
+    locale: Locale::EU,
     minor_units: 100,
     name: "Swedish Krona",
     symbol: "kr",
@@ -1906,23 +1907,26 @@ impl Currency {
            lotus_builder.format_positive("{symbol}{value}");
            lotus_builder.format_negative("{symbol}({value})");
            match currency_data.locale{
-               Locale::USA | Locale::India | Locale::Sweden => lotus_builder.format_zero("{symbol}0.00"),
+               Locale::USA | Locale::India | Locale::Poland => lotus_builder.format_zero("{symbol}0.00"),
                Locale::EU => lotus_builder.format_zero("{symbol}0,00"),
            };
        } else {
            lotus_builder.format_positive("{value}{symbol}");
            lotus_builder.format_negative("{value}{symbol}");
            match currency_data.locale{
-               Locale::USA | Locale::India | Locale::Sweden => lotus_builder.format_zero("0.00{symbol}"),
+               Locale::USA | Locale::India | Locale::Poland => lotus_builder.format_zero("0.00{symbol}"),
                Locale::EU => lotus_builder.format_zero("0,00{symbol}")
            };
        }
 
        match currency_data.locale{
-           Locale::USA | Locale::India | Locale::Sweden => {
+           Locale::USA | Locale::India => {
                lotus_builder.thousand_str(",");
                lotus_builder.decimal_str(".");
            },
+           Locale::Poland =>{
+               lotus_builder.thousand_str(" ");
+           }
            Locale::EU => {
                lotus_builder.thousand_str(".");
                lotus_builder.decimal_str(",");
