@@ -1,5 +1,5 @@
 [package]
-name = "tax_engine"
+name = "income_tax_engine"
 version = "0.1.0"
 authors = ["Javed Nissar <javednissar@protonmail.com>"]
 edition = "2018"

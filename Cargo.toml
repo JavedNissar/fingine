@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "tax_engine",
+    "income_tax_engine",
     "fingine",
     "simple_money",
 ]

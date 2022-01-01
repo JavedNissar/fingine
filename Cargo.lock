@@ -100,6 +100,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 
 [[package]]
+name = "income_tax_engine"
+version = "0.1.0"
+dependencies = [
+ "rust_decimal",
+ "rust_decimal_macros",
+ "simple_money",
+ "thiserror",
+]
+
+[[package]]
 name = "num-traits"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -207,16 +217,6 @@ dependencies = [
  "proc-macro2 1.0.24",
  "quote 1.0.8",
  "unicode-xid 0.2.1",
-]
-
-[[package]]
-name = "tax_engine"
-version = "0.1.0"
-dependencies = [
- "rust_decimal",
- "rust_decimal_macros",
- "simple_money",
- "thiserror",
 ]
 
 [[package]]
