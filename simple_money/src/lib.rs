@@ -57,9 +57,12 @@ impl Exchange {
 
     pub fn set_rate(&mut self, from: Currency, to: Currency, rate: Decimal){
         let key = ExchangeRateQuery { from, to };
-        let inverse_key = ExchangeRateQuery{ from: to, to: from };
         self.rates.insert(key, rate);
-        self.rates.insert(inverse_key, Decimal::new(1, 0) / rate);
+    }
+
+    pub fn set_rate_and_inverse(&mut self, from: Currency, to: Currency, rate: Decimal) {
+        self.set_rate(from, to, rate);
+        self.set_rate(to, from, Decimal::new(1, 0) / rate);
     }
 
     pub fn get_rate(&self, from: Currency, to: Currency) -> Result<Decimal, MoneyError>{
@@ -148,6 +151,10 @@ impl Exchange {
     }
 
     pub fn clamp(&self, input: Money, min: Money, max: Money, output_currency: Currency) -> Result<Money, MoneyError>{
+        if input.currency != min.currency || input.currency != max.currency {
+            return Err(MoneyError::MismatchedCurrencies);
+        }
+
         if input.currency == output_currency && min.currency == output_currency && max.currency == output_currency {
             Ok(input.clamp(min, max))
         }else{
