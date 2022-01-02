@@ -17,7 +17,7 @@ enum Locale {
     Poland,
 }
 
-const aed_currency_data: CurrencyData =  CurrencyData {
+const AED_CURRENCY_DATA: CurrencyData =  CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 25,
@@ -26,7 +26,7 @@ const aed_currency_data: CurrencyData =  CurrencyData {
     symbol_first: false,
 };
 
-const afn_currency_data: CurrencyData = CurrencyData {
+const AFN_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 100,
@@ -1548,7 +1548,7 @@ const zwl_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum Currency {
     INR,
     TWD,
@@ -1724,8 +1724,8 @@ pub enum Currency {
 impl Currency {
     fn match_currency_to_data(&self) -> CurrencyData {
         match self {
-            Currency::AED => aed_currency_data,
-            Currency::AFN => afn_currency_data,
+            Currency::AED => AED_CURRENCY_DATA,
+            Currency::AFN => AFN_CURRENCY_DATA,
             Currency::ALL => all_currency_data,
             Currency::AMD => amd_currency_data,
             Currency::ANG => ang_currency_data,
@@ -1899,7 +1899,7 @@ impl Currency {
     pub fn match_currency_to_lotus(&self) -> Result<crate::Lotus, String> {
        let currency_data = self.match_currency_to_data();
 
-       let lotus_builder = LotusBuilder::default();
+       let mut lotus_builder = LotusBuilder::default();
        lotus_builder.symbol(currency_data.symbol);
        lotus_builder.precision(currency_data.exponent);
        
