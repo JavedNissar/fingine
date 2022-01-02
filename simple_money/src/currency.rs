@@ -35,7 +35,7 @@ const AFN_CURRENCY_DATA: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const all_currency_data: CurrencyData = CurrencyData {
+const ALL_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::EU,
     minor_units: 1,
@@ -44,7 +44,7 @@ const all_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const amd_currency_data: CurrencyData = CurrencyData {
+const AMD_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 10,
@@ -53,7 +53,7 @@ const amd_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const ang_currency_data: CurrencyData = CurrencyData {
+const ANG_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 10,
@@ -1726,9 +1726,9 @@ impl Currency {
         match self {
             Currency::AED => AED_CURRENCY_DATA,
             Currency::AFN => AFN_CURRENCY_DATA,
-            Currency::ALL => all_currency_data,
-            Currency::AMD => amd_currency_data,
-            Currency::ANG => ang_currency_data,
+            Currency::ALL => ALL_CURRENCY_DATA,
+            Currency::AMD => AMD_CURRENCY_DATA,
+            Currency::ANG => ANG_CURRENCY_DATA,
             Currency::AOA => aoa_currency_data,
             Currency::ARS => ars_currency_data,
             Currency::AUD => aud_currency_data,
