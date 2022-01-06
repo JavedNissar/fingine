@@ -188,7 +188,7 @@ const BOB_CURRENCY_DATA: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const brl_currency_data: CurrencyData = CurrencyData {
+const BRL_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -197,7 +197,7 @@ const brl_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const bsd_currency_data: CurrencyData = CurrencyData {
+const BSD_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -206,7 +206,7 @@ const bsd_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const btn_currency_data: CurrencyData = CurrencyData {
+const BTN_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -215,7 +215,7 @@ const btn_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const bwp_currency_data: CurrencyData = CurrencyData{
+const BWP_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -224,7 +224,7 @@ const bwp_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const byn_currency_data: CurrencyData = CurrencyData {
+const BYN_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::Poland,
     minor_units: 1,
@@ -233,7 +233,7 @@ const byn_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const byr_currency_data: CurrencyData = CurrencyData{
+const BYR_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::Poland,
     minor_units: 100,
@@ -242,7 +242,7 @@ const byr_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const bzd_currency_data: CurrencyData = CurrencyData{
+const BZD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -251,7 +251,7 @@ const bzd_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const cad_currency_data: CurrencyData = CurrencyData{
+const CAD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -260,7 +260,7 @@ const cad_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const cdf_currency_data: CurrencyData = CurrencyData{
+const CDF_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -269,7 +269,7 @@ const cdf_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const chf_currency_data: CurrencyData = CurrencyData{
+const CHF_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -278,7 +278,7 @@ const chf_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const clf_currency_data: CurrencyData = CurrencyData{
+const CLF_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 4,
     locale: Locale::EU,
     minor_units: 5,
@@ -287,7 +287,7 @@ const clf_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const clp_currency_data: CurrencyData = CurrencyData{
+const CLP_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::EU,
     minor_units: 1,
@@ -296,7 +296,7 @@ const clp_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const cny_currency_data: CurrencyData = CurrencyData{
+const CNY_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -305,7 +305,7 @@ const cny_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const cop_currency_data: CurrencyData = CurrencyData {
+const COP_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::EU,
     minor_units: 20,
@@ -314,7 +314,7 @@ const cop_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const crc_currency_data: CurrencyData = CurrencyData {
+const CRC_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::EU,
     minor_units: 100,
@@ -323,7 +323,7 @@ const crc_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const cuc_currency_data: CurrencyData = CurrencyData {
+const CUC_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -332,7 +332,7 @@ const cuc_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const cup_currency_data: CurrencyData = CurrencyData {
+const CUP_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -341,7 +341,7 @@ const cup_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const cve_currency_data: CurrencyData = CurrencyData {
+const CVE_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 100,
@@ -350,7 +350,7 @@ const cve_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const czk_currency_data: CurrencyData = CurrencyData {
+const CZK_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::Poland,
     minor_units: 100,
@@ -359,7 +359,7 @@ const czk_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const djf_currency_data: CurrencyData = CurrencyData {
+const DJF_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -368,7 +368,7 @@ const djf_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const dkk_currency_data: CurrencyData = CurrencyData {
+const DKK_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::EU,
     minor_units: 50,
@@ -377,7 +377,7 @@ const dkk_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const dop_currency_data: CurrencyData = CurrencyData {
+const DOP_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 100,
@@ -386,7 +386,7 @@ const dop_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const dzd_currency_data: CurrencyData = CurrencyData{
+const DZD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale:  Locale::USA,
     minor_units: 100,
@@ -395,7 +395,7 @@ const dzd_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const egp_currency_data: CurrencyData= CurrencyData {
+const EGP_CURRENCY_DATA: CurrencyData= CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 25,
@@ -404,7 +404,7 @@ const egp_currency_data: CurrencyData= CurrencyData {
     symbol_first: true,
 };
 
-const ern_currency_data: CurrencyData = CurrencyData{
+const ERN_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -413,7 +413,7 @@ const ern_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const etb_currency_data: CurrencyData = CurrencyData {
+const ETB_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -422,7 +422,7 @@ const etb_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const eur_currency_data: CurrencyData = CurrencyData {
+const EUR_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::EU,
     minor_units: 1,
@@ -431,7 +431,7 @@ const eur_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const fjd_currency_data: CurrencyData = CurrencyData {
+const FJD_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::EU,
     minor_units: 5,
@@ -440,7 +440,7 @@ const fjd_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const fkp_currency_data: CurrencyData = CurrencyData {
+const FKP_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::EU,
     minor_units: 1,
@@ -449,7 +449,7 @@ const fkp_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const gbp_currency_data: CurrencyData = CurrencyData {
+const GBP_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -458,7 +458,7 @@ const gbp_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const gel_currency_data: CurrencyData = CurrencyData{
+const GEL_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -467,7 +467,7 @@ const gel_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const ghs_currency_data: CurrencyData = CurrencyData {
+const GHS_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -476,7 +476,7 @@ const ghs_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const gip_currency_data: CurrencyData = CurrencyData {
+const GIP_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -485,7 +485,7 @@ const gip_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const gnf_currency_data: CurrencyData = CurrencyData {
+const GNF_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -494,7 +494,7 @@ const gnf_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const gtq_currency_data: CurrencyData = CurrencyData {
+const GTQ_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -503,7 +503,7 @@ const gtq_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const gyd_currency_data: CurrencyData = CurrencyData {
+const GYD_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 100,
@@ -512,7 +512,7 @@ const gyd_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const hkd_currency_data: CurrencyData = CurrencyData{
+const HKD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 10,
@@ -521,7 +521,7 @@ const hkd_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const hnl_currency_data: CurrencyData = CurrencyData{
+const HNL_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -530,7 +530,7 @@ const hnl_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const hrk_currency_data: CurrencyData = CurrencyData{
+const HRK_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::EU,
     minor_units: 1,
@@ -539,7 +539,7 @@ const hrk_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const htg_currency_data: CurrencyData = CurrencyData{
+const HTG_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -548,7 +548,7 @@ const htg_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const huf_currency_data: CurrencyData = CurrencyData {
+const HUF_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::Poland,
     minor_units: 5,
@@ -557,7 +557,7 @@ const huf_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const idr_currency_data: CurrencyData = CurrencyData {
+const IDR_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5000,
@@ -566,7 +566,7 @@ const idr_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const ils_currency_data: CurrencyData = CurrencyData {
+const ILS_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 10,
@@ -575,7 +575,7 @@ const ils_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const inr_currency_data: CurrencyData = CurrencyData {
+const INR_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::India,
     minor_units: 50,
@@ -584,7 +584,7 @@ const inr_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const iqd_currency_data: CurrencyData  = CurrencyData {
+const IQD_CURRENCY_DATA: CurrencyData  = CurrencyData {
     exponent: 3,
     locale: Locale::USA,
     minor_units: 50000,
@@ -593,7 +593,7 @@ const iqd_currency_data: CurrencyData  = CurrencyData {
     symbol_first: false,
 };
 
-const irr_currency_data: CurrencyData = CurrencyData {
+const IRR_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5000,
@@ -602,7 +602,7 @@ const irr_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const isk_currency_data: CurrencyData = CurrencyData{
+const ISK_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::EU,
     minor_units: 1,
@@ -611,7 +611,7 @@ const isk_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const jmd_currency_data: CurrencyData = CurrencyData {
+const JMD_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -620,7 +620,7 @@ const jmd_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const jod_currency_data: CurrencyData = CurrencyData {
+const JOD_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 3,
     locale: Locale::USA,
     minor_units: 5,
@@ -629,7 +629,7 @@ const jod_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const jpy_currency_data: CurrencyData = CurrencyData{
+const JPY_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 1,
@@ -638,7 +638,7 @@ const jpy_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const kes_currency_data: CurrencyData = CurrencyData {
+const KES_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 50,
@@ -647,7 +647,7 @@ const kes_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const kgs_currency_data: CurrencyData = CurrencyData {
+const KGS_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -656,7 +656,7 @@ const kgs_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const khr_currency_data: CurrencyData = CurrencyData {
+const KHR_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5000,
@@ -665,7 +665,7 @@ const khr_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const kmf_currency_data: CurrencyData = CurrencyData{
+const KMF_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -674,7 +674,7 @@ const kmf_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const kpw_currency_data: CurrencyData = CurrencyData {
+const KPW_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -683,7 +683,7 @@ const kpw_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const krw_currency_data: CurrencyData = CurrencyData {
+const KRW_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 0,
     locale: Locale::USA,
     minor_units: 1,
@@ -692,7 +692,7 @@ const krw_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const kwd_currency_data: CurrencyData = CurrencyData {
+const KWD_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 3,
     locale: Locale::USA,
     minor_units: 5,
@@ -701,7 +701,7 @@ const kwd_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const kyd_currency_data: CurrencyData = CurrencyData {
+const KYD_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -710,7 +710,7 @@ const kyd_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const kzt_currency_data: CurrencyData = CurrencyData {
+const KZT_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 100,
@@ -719,7 +719,7 @@ const kzt_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const lak_currency_data: CurrencyData = CurrencyData {
+const LAK_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 10,
@@ -728,7 +728,7 @@ const lak_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const lbp_currency_data: CurrencyData = CurrencyData {
+const LBP_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 25000,
@@ -737,7 +737,7 @@ const lbp_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const lkr_currency_data: CurrencyData = CurrencyData {
+const LKR_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 100,
@@ -746,7 +746,7 @@ const lkr_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const lrd_currency_data: CurrencyData = CurrencyData {
+const LRD_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -755,7 +755,7 @@ const lrd_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const lsl_currency_data: CurrencyData = CurrencyData {
+const LSL_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -764,7 +764,7 @@ const lsl_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const lyd_currency_data: CurrencyData = CurrencyData {
+const LYD_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 3,
     locale: Locale::USA,
     minor_units: 50,
@@ -773,7 +773,7 @@ const lyd_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,              
 };
 
-const mad_currency_data: CurrencyData = CurrencyData {
+const MAD_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -783,7 +783,7 @@ const mad_currency_data: CurrencyData = CurrencyData {
 };
 
 
-const mdl_currency_data: CurrencyData = CurrencyData {
+const MDL_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -792,7 +792,7 @@ const mdl_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const mkd_currency_data: CurrencyData = CurrencyData {
+const MKD_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 100,
@@ -801,7 +801,7 @@ const mkd_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const mmk_currency_data: CurrencyData = CurrencyData{
+const MMK_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 50,
@@ -810,7 +810,7 @@ const mmk_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const mnt_currency_data: CurrencyData = CurrencyData {
+const MNT_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 2000,
@@ -819,7 +819,7 @@ const mnt_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const mop_currency_data: CurrencyData = CurrencyData {
+const MOP_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 10,
@@ -828,7 +828,7 @@ const mop_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const mur_currency_data: CurrencyData = CurrencyData{
+const MUR_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 100,
@@ -837,7 +837,7 @@ const mur_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const mvr_currency_data: CurrencyData = CurrencyData{
+const MVR_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 100,
@@ -846,7 +846,7 @@ const mvr_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const mwk_currency_data: CurrencyData = CurrencyData{
+const MWK_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -855,7 +855,7 @@ const mwk_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const mxn_currency_data: CurrencyData = CurrencyData{
+const MXN_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -864,7 +864,7 @@ const mxn_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const myr_currency_data: CurrencyData = CurrencyData{
+const MYR_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -873,7 +873,7 @@ const myr_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const mzn_currency_data: CurrencyData = CurrencyData{
+const MZN_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -882,7 +882,7 @@ const mzn_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const nad_currency_data: CurrencyData = CurrencyData{
+const NAD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -891,7 +891,7 @@ const nad_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const ngn_currency_data: CurrencyData = CurrencyData{
+const NGN_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 50,
@@ -900,7 +900,7 @@ const ngn_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const nio_currency_data: CurrencyData = CurrencyData{
+const NIO_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -909,7 +909,7 @@ const nio_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const nok_currency_data: CurrencyData = CurrencyData{
+const NOK_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 100,
@@ -918,7 +918,7 @@ const nok_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const npr_currency_data: CurrencyData = CurrencyData{
+const NPR_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -927,7 +927,7 @@ const npr_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const nzd_currency_data: CurrencyData = CurrencyData{
+const NZD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 10,
@@ -936,7 +936,7 @@ const nzd_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const omr_currency_data: CurrencyData = CurrencyData{
+const OMR_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 3,
     locale: Locale::USA,
     minor_units: 5,
@@ -945,7 +945,7 @@ const omr_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const pab_currency_data: CurrencyData = CurrencyData{
+const PAB_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -954,7 +954,7 @@ const pab_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const pen_currency_data: CurrencyData = CurrencyData{
+const PEN_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -963,7 +963,7 @@ const pen_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const pgk_currency_data: CurrencyData = CurrencyData{
+const PGK_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -972,7 +972,7 @@ const pgk_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const php_currency_data: CurrencyData = CurrencyData{
+const PHP_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -981,7 +981,7 @@ const php_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const pkr_currency_data: CurrencyData = CurrencyData{
+const PKR_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 100,
@@ -990,7 +990,7 @@ const pkr_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const pln_currency_data: CurrencyData = CurrencyData{
+const PLN_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::Poland,
     minor_units: 1,
@@ -999,7 +999,7 @@ const pln_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const pyg_currency_data: CurrencyData = CurrencyData {
+const PYG_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 0,
     locale: Locale::Poland,
     minor_units: 5000,
@@ -1008,7 +1008,7 @@ const pyg_currency_data: CurrencyData = CurrencyData {
     symbol_first: true,
 };
 
-const qar_currency_data: CurrencyData = CurrencyData{
+const QAR_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::Poland,
     minor_units: 1,
@@ -1017,7 +1017,7 @@ const qar_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const ron_currency_data: CurrencyData = CurrencyData{
+const RON_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::EU,
     minor_units: 1,
@@ -1026,7 +1026,7 @@ const ron_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const rsd_currency_data: CurrencyData = CurrencyData{
+const RSD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 100,
@@ -1035,7 +1035,7 @@ const rsd_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const rub_currency_data: CurrencyData = CurrencyData{
+const RUB_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::EU,
     minor_units: 1,
@@ -1044,7 +1044,7 @@ const rub_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const rwf_currency_data: CurrencyData = CurrencyData{
+const RWF_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -1053,7 +1053,7 @@ const rwf_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const sar_currency_data: CurrencyData = CurrencyData{
+const SAR_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -1062,7 +1062,7 @@ const sar_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const sbd_currency_data: CurrencyData = CurrencyData{ 
+const SBD_CURRENCY_DATA: CurrencyData = CurrencyData{ 
     exponent: 2,
     locale: Locale::USA,
     minor_units: 10,
@@ -1071,7 +1071,7 @@ const sbd_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const scr_currency_data: CurrencyData = CurrencyData{
+const SCR_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1080,7 +1080,7 @@ const scr_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const sdg_currency_data: CurrencyData = CurrencyData{
+const SDG_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1089,7 +1089,7 @@ const sdg_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const sek_currency_data: CurrencyData = CurrencyData{
+const SEK_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::EU,
     minor_units: 100,
@@ -1098,7 +1098,7 @@ const sek_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const sgd_currency_data: CurrencyData = CurrencyData{
+const SGD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1107,7 +1107,7 @@ const sgd_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const shp_currency_data: CurrencyData = CurrencyData{
+const SHP_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1116,7 +1116,7 @@ const shp_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const skk_currency_data: CurrencyData = CurrencyData{
+const SKK_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 50,
@@ -1125,7 +1125,7 @@ const skk_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const sll_currency_data: CurrencyData = CurrencyData{
+const SLL_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1000,
@@ -1134,7 +1134,7 @@ const sll_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const sos_currency_data: CurrencyData = CurrencyData{
+const SOS_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1143,7 +1143,7 @@ const sos_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const srd_currency_data: CurrencyData = CurrencyData{
+const SRD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1152,7 +1152,7 @@ const srd_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const ssp_currency_data: CurrencyData = CurrencyData{
+const SSP_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -1161,7 +1161,7 @@ const ssp_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const std_currency_data: CurrencyData = CurrencyData{
+const STD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 10000,
@@ -1170,7 +1170,7 @@ const std_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const stn_currency_data: CurrencyData = CurrencyData{
+const STN_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 10,
@@ -1179,7 +1179,7 @@ const stn_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const svc_currency_data: CurrencyData = CurrencyData{
+const SVC_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1188,7 +1188,7 @@ const svc_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const syp_currency_data: CurrencyData = CurrencyData{
+const SYP_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 100,
@@ -1197,7 +1197,7 @@ const syp_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const szl_currency_data: CurrencyData = CurrencyData{
+const SZL_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1206,7 +1206,7 @@ const szl_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const thb_currency_data: CurrencyData = CurrencyData{
+const THB_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1215,7 +1215,7 @@ const thb_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const tjs_currency_data: CurrencyData = CurrencyData {
+const TJS_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1224,7 +1224,7 @@ const tjs_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const tmt_currency_data: CurrencyData = CurrencyData {
+const TMT_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1233,7 +1233,7 @@ const tmt_currency_data: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
-const tnd_currency_data: CurrencyData = CurrencyData{
+const TND_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 3,
     locale: Locale::USA,
     minor_units: 10,
@@ -1242,7 +1242,7 @@ const tnd_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const top_currency_data: CurrencyData = CurrencyData{
+const TOP_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1251,7 +1251,7 @@ const top_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const try_currency_data: CurrencyData = CurrencyData{
+const TRY_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::EU,
     minor_units: 1,
@@ -1260,7 +1260,7 @@ const try_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const ttd_currency_data: CurrencyData = CurrencyData{
+const TTD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1269,7 +1269,7 @@ const ttd_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const twd_currency_data: CurrencyData = CurrencyData{
+const TWD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 50,
@@ -1278,7 +1278,7 @@ const twd_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const tzs_currency_data: CurrencyData = CurrencyData{
+const TZS_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5000,
@@ -1287,7 +1287,7 @@ const tzs_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const uah_currency_data: CurrencyData = CurrencyData{
+const UAH_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1296,7 +1296,7 @@ const uah_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const ugx_currency_data: CurrencyData = CurrencyData{
+const UGX_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 1000,
@@ -1305,7 +1305,7 @@ const ugx_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const usd_currency_data: CurrencyData = CurrencyData{
+const USD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1314,7 +1314,7 @@ const usd_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const uyu_currency_data: CurrencyData = CurrencyData{
+const UYU_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::EU,
     minor_units: 100,
@@ -1323,7 +1323,7 @@ const uyu_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const uyw_currency_data: CurrencyData = CurrencyData{
+const UYW_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 4,
     locale: Locale::EU,
     minor_units: 1000,
@@ -1332,7 +1332,7 @@ const uyw_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const uzs_currency_data: CurrencyData = CurrencyData{
+const UZS_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 100,
@@ -1341,7 +1341,7 @@ const uzs_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const ves_currency_data: CurrencyData = CurrencyData{
+const VES_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::EU,
     minor_units: 1,
@@ -1350,7 +1350,7 @@ const ves_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const vnd_currency_data: CurrencyData = CurrencyData{
+const VND_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::EU,
     minor_units: 100,
@@ -1359,7 +1359,7 @@ const vnd_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const vuv_currency_data: CurrencyData = CurrencyData{
+const VUV_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 1,
@@ -1368,7 +1368,7 @@ const vuv_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const wst_currency_data: CurrencyData = CurrencyData{
+const WST_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 10,
@@ -1377,7 +1377,7 @@ const wst_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const xaf_currency_data: CurrencyData = CurrencyData{
+const XAF_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -1386,7 +1386,7 @@ const xaf_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const xag_currency_data: CurrencyData = CurrencyData{
+const XAG_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -1395,7 +1395,7 @@ const xag_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const xau_currency_data: CurrencyData = CurrencyData{
+const XAU_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -1404,7 +1404,7 @@ const xau_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const xba_currency_data: CurrencyData = CurrencyData{
+const XBA_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -1413,7 +1413,7 @@ const xba_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const xbb_currency_data: CurrencyData = CurrencyData{
+const XBB_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -1422,7 +1422,7 @@ const xbb_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const xbc_currency_data: CurrencyData = CurrencyData{
+const XBC_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -1431,7 +1431,7 @@ const xbc_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const xbd_currency_data: CurrencyData = CurrencyData{
+const XBD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -1440,7 +1440,7 @@ const xbd_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const xcd_currency_data: CurrencyData = CurrencyData{
+const XCD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1449,7 +1449,7 @@ const xcd_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const xdr_currency_data: CurrencyData = CurrencyData{
+const XDR_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -1458,7 +1458,7 @@ const xdr_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const xof_currency_data: CurrencyData = CurrencyData{
+const XOF_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -1467,7 +1467,7 @@ const xof_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const xpd_currency_data: CurrencyData = CurrencyData{
+const XPD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -1476,7 +1476,7 @@ const xpd_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const xpf_currency_data: CurrencyData = CurrencyData{ 
+const XPF_CURRENCY_DATA: CurrencyData = CurrencyData{ 
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -1485,7 +1485,7 @@ const xpf_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const xpt_currency_data: CurrencyData = CurrencyData{
+const XPT_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -1494,7 +1494,7 @@ const xpt_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const xts_currency_data: CurrencyData = CurrencyData{
+const XTS_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 0,
     locale: Locale::USA,
     minor_units: 100,
@@ -1503,7 +1503,7 @@ const xts_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const yer_currency_data: CurrencyData = CurrencyData{
+const YER_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 100,
@@ -1512,7 +1512,7 @@ const yer_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const zar_currency_data: CurrencyData = CurrencyData{
+const ZAR_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 10,
@@ -1521,7 +1521,7 @@ const zar_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const zmk_currency_data: CurrencyData = CurrencyData{
+const ZMK_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -1530,7 +1530,7 @@ const zmk_currency_data: CurrencyData = CurrencyData{
     symbol_first: false,
 };
 
-const zmw_currency_data: CurrencyData = CurrencyData{
+const ZMW_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 5,
@@ -1539,7 +1539,7 @@ const zmw_currency_data: CurrencyData = CurrencyData{
     symbol_first: true,
 };
 
-const zwl_currency_data: CurrencyData = CurrencyData{
+const ZWL_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
     minor_units: 1,
@@ -1719,6 +1719,7 @@ pub enum Currency {
     SBD,
     CAD,
     MUR,
+    YER,
 }
 
 impl Currency {
@@ -1743,156 +1744,157 @@ impl Currency {
             Currency::BMD => BMD_CURRENCY_DATA,
             Currency::BND => BND_CURRENCY_DATA,
             Currency::BOB => BOB_CURRENCY_DATA,
-            Currency::BRL => brl_currency_data,
-            Currency::BSD => bsd_currency_data,
-            Currency::BTN => btn_currency_data,
-            Currency::BWP => bwp_currency_data,
-            Currency::BYN => byn_currency_data,
-            Currency::BYR => byr_currency_data,
-            Currency::BZD => bzd_currency_data,
-            Currency::CAD => cad_currency_data,
-            Currency::CDF => cdf_currency_data,
-            Currency::CHF => chf_currency_data,
-            Currency::CLF => clf_currency_data,
-            Currency::CLP => clp_currency_data,
-            Currency::CNY => cny_currency_data,
-            Currency::COP => cop_currency_data,
-            Currency::CRC => crc_currency_data,
-            Currency::CUC => cuc_currency_data,
-            Currency::CUP => cup_currency_data,
-            Currency::CVE => cve_currency_data,
-            Currency::CZK => czk_currency_data,
-            Currency::DJF => djf_currency_data,
-            Currency::DKK => dkk_currency_data,
-            Currency::DOP => dop_currency_data,
-            Currency::DZD => dzd_currency_data,
-            Currency::EGP => egp_currency_data,
-            Currency::ERN => ern_currency_data,
-            Currency::ETB => etb_currency_data,
-            Currency::EUR => eur_currency_data,
-            Currency::FJD => fjd_currency_data,
-            Currency::FKP => fkp_currency_data,
-            Currency::GBP => gbp_currency_data,
-            Currency::GEL => gel_currency_data,
-            Currency::GHS => ghs_currency_data,
-            Currency::GIP => gip_currency_data,
-            Currency::GNF => gnf_currency_data,
-            Currency::GTQ => gtq_currency_data,
-            Currency::GYD => gyd_currency_data,
-            Currency::HKD => hkd_currency_data,
-            Currency::HNL => hnl_currency_data,
-            Currency::HRK => hrk_currency_data,
-            Currency::HTG => htg_currency_data,
-            Currency::HUF => huf_currency_data,
-            Currency::IDR => idr_currency_data,
-            Currency::ILS => ils_currency_data,
-            Currency::INR => inr_currency_data,
-            Currency::IQD => iqd_currency_data,
-            Currency::IRR => irr_currency_data,
-            Currency::ISK => isk_currency_data,
-            Currency::JMD => jmd_currency_data,
-            Currency::JOD => jod_currency_data,
-            Currency::JPY => jpy_currency_data,
-            Currency::KES => kes_currency_data,
-            Currency::KGS => kgs_currency_data,
-            Currency::KHR => khr_currency_data,
-            Currency::KMF => kmf_currency_data,
-            Currency::KPW => kpw_currency_data,
-            Currency::KRW => krw_currency_data,
-            Currency::KWD => kwd_currency_data,
-            Currency::KYD => kyd_currency_data,
-            Currency::KZT => kzt_currency_data,
-            Currency::LAK => lak_currency_data,
-            Currency::LBP => lbp_currency_data,
-            Currency::LKR => lkr_currency_data,
-            Currency::LRD => lrd_currency_data,
-            Currency::LSL => lsl_currency_data,
-            Currency::LYD => lyd_currency_data,
-            Currency::MAD => mad_currency_data,
-            Currency::MDL => mdl_currency_data,
-            Currency::MKD => mkd_currency_data,
-            Currency::MMK => mmk_currency_data,
-            Currency::MNT => mnt_currency_data,
-            Currency::MOP => mop_currency_data,
-            Currency::MUR => mur_currency_data,
-            Currency::MVR => mvr_currency_data,
-            Currency::MWK => mwk_currency_data,
-            Currency::MXN => mxn_currency_data,
-            Currency::MYR => myr_currency_data,
-            Currency::MZN => mzn_currency_data,
-            Currency::NAD => nad_currency_data,
-            Currency::NGN => ngn_currency_data,
-            Currency::NIO => nio_currency_data,
-            Currency::NOK => nok_currency_data,
-            Currency::NPR => npr_currency_data,
-            Currency::NZD => nzd_currency_data,
-            Currency::OMR => omr_currency_data,
-            Currency::PAB => pab_currency_data,
-            Currency::PEN => pen_currency_data,
-            Currency::PGK => pgk_currency_data,
-            Currency::PHP => php_currency_data,
-            Currency::PKR => pkr_currency_data,
-            Currency::PLN => pln_currency_data,
-            Currency::PYG => pyg_currency_data,
-            Currency::QAR => qar_currency_data,
-            Currency::RON => ron_currency_data,
-            Currency::RSD => rsd_currency_data,
-            Currency::RUB => rub_currency_data,
-            Currency::RWF => rwf_currency_data,
-            Currency::SAR => sar_currency_data,
-            Currency::SBD => sbd_currency_data,
-            Currency::SCR => scr_currency_data,
-            Currency::SDG => sdg_currency_data,
-            Currency::SEK => sek_currency_data,
-            Currency::SGD => sgd_currency_data,
-            Currency::SHP => shp_currency_data,
-            Currency::SKK => skk_currency_data,
-            Currency::SLL => sll_currency_data,
-            Currency::SOS => sos_currency_data,
-            Currency::SRD => srd_currency_data,
-            Currency::SSP => ssp_currency_data,
-            Currency::STD => std_currency_data,
-            Currency::STN => stn_currency_data,
-            Currency::SVC => svc_currency_data,
-            Currency::SYP => syp_currency_data,
-            Currency::SZL => szl_currency_data,
-            Currency::THB => thb_currency_data,
-            Currency::TJS => tjs_currency_data,
-            Currency::TMT => tmt_currency_data,
-            Currency::TND => tnd_currency_data,
-            Currency::TOP => top_currency_data,
-            Currency::TRY => try_currency_data,
-            Currency::TTD => ttd_currency_data,
-            Currency::TWD => twd_currency_data,
-            Currency::TZS => tzs_currency_data,
-            Currency::UAH => uah_currency_data,
-            Currency::UGX => ugx_currency_data,
-            Currency::USD => usd_currency_data,
-            Currency::UYU => uyu_currency_data,
-            Currency::UYW => uyw_currency_data,
-            Currency::UZS => uzs_currency_data,
-            Currency::VES => ves_currency_data,
-            Currency::VND => vnd_currency_data,
-            Currency::VUV => vuv_currency_data,
-            Currency::WST => wst_currency_data,
-            Currency::XAF => xaf_currency_data,
-            Currency::XAG => xag_currency_data,
-            Currency::XAU => xau_currency_data,
-            Currency::XBA => xba_currency_data,
-            Currency::XBB => xbb_currency_data,
-            Currency::XBC => xbc_currency_data,
-            Currency::XBD => xbd_currency_data,
-            Currency::XCD => xcd_currency_data,
-            Currency::XDR => xdr_currency_data,
-            Currency::XOF => xof_currency_data,
-            Currency::XPD => xpd_currency_data,
-            Currency::XPF => xpf_currency_data,
-            Currency::XPT => xpt_currency_data,
-            Currency::XTS => xts_currency_data,
-            Currency::ZAR => zar_currency_data,
-            Currency::ZMK => zmk_currency_data,
-            Currency::ZMW => zmw_currency_data,
-            Currency::ZWL => zwl_currency_data,
+            Currency::BRL => BRL_CURRENCY_DATA,
+            Currency::BSD => BSD_CURRENCY_DATA,
+            Currency::BTN => BTN_CURRENCY_DATA,
+            Currency::BWP => BWP_CURRENCY_DATA,
+            Currency::BYN => BYN_CURRENCY_DATA,
+            Currency::BYR => BYR_CURRENCY_DATA,
+            Currency::BZD => BZD_CURRENCY_DATA,
+            Currency::CAD => CAD_CURRENCY_DATA,
+            Currency::CDF => CDF_CURRENCY_DATA,
+            Currency::CHF => CHF_CURRENCY_DATA,
+            Currency::CLF => CLF_CURRENCY_DATA,
+            Currency::CLP => CLP_CURRENCY_DATA,
+            Currency::CNY => CNY_CURRENCY_DATA,
+            Currency::COP => COP_CURRENCY_DATA,
+            Currency::CRC => CRC_CURRENCY_DATA,
+            Currency::CUC => CUC_CURRENCY_DATA,
+            Currency::CUP => CUP_CURRENCY_DATA,
+            Currency::CVE => CVE_CURRENCY_DATA,
+            Currency::CZK => CZK_CURRENCY_DATA,
+            Currency::DJF => DJF_CURRENCY_DATA,
+            Currency::DKK => DKK_CURRENCY_DATA,
+            Currency::DOP => DOP_CURRENCY_DATA,
+            Currency::DZD => DZD_CURRENCY_DATA,
+            Currency::EGP => EGP_CURRENCY_DATA,
+            Currency::ERN => ERN_CURRENCY_DATA,
+            Currency::ETB => ETB_CURRENCY_DATA,
+            Currency::EUR => EUR_CURRENCY_DATA,
+            Currency::FJD => FJD_CURRENCY_DATA,
+            Currency::FKP => FKP_CURRENCY_DATA,
+            Currency::GBP => GBP_CURRENCY_DATA,
+            Currency::GEL => GEL_CURRENCY_DATA,
+            Currency::GHS => GHS_CURRENCY_DATA,
+            Currency::GIP => GIP_CURRENCY_DATA,
+            Currency::GNF => GNF_CURRENCY_DATA,
+            Currency::GTQ => GTQ_CURRENCY_DATA,
+            Currency::GYD => GYD_CURRENCY_DATA,
+            Currency::HKD => HKD_CURRENCY_DATA,
+            Currency::HNL => HNL_CURRENCY_DATA,
+            Currency::HRK => HRK_CURRENCY_DATA,
+            Currency::HTG => HTG_CURRENCY_DATA,
+            Currency::HUF => HUF_CURRENCY_DATA,
+            Currency::IDR => IDR_CURRENCY_DATA,
+            Currency::ILS => ILS_CURRENCY_DATA,
+            Currency::INR => INR_CURRENCY_DATA,
+            Currency::IQD => IQD_CURRENCY_DATA,
+            Currency::IRR => IRR_CURRENCY_DATA,
+            Currency::ISK => ISK_CURRENCY_DATA,
+            Currency::JMD => JMD_CURRENCY_DATA,
+            Currency::JOD => JOD_CURRENCY_DATA,
+            Currency::JPY => JPY_CURRENCY_DATA,
+            Currency::KES => KES_CURRENCY_DATA,
+            Currency::KGS => KGS_CURRENCY_DATA,
+            Currency::KHR => KHR_CURRENCY_DATA,
+            Currency::KMF => KMF_CURRENCY_DATA,
+            Currency::KPW => KPW_CURRENCY_DATA,
+            Currency::KRW => KRW_CURRENCY_DATA,
+            Currency::KWD => KWD_CURRENCY_DATA,
+            Currency::KYD => KYD_CURRENCY_DATA,
+            Currency::KZT => KZT_CURRENCY_DATA,
+            Currency::LAK => LAK_CURRENCY_DATA,
+            Currency::LBP => LBP_CURRENCY_DATA,
+            Currency::LKR => LKR_CURRENCY_DATA,
+            Currency::LRD => LRD_CURRENCY_DATA,
+            Currency::LSL => LSL_CURRENCY_DATA,
+            Currency::LYD => LYD_CURRENCY_DATA,
+            Currency::MAD => MAD_CURRENCY_DATA,
+            Currency::MDL => MDL_CURRENCY_DATA,
+            Currency::MKD => MKD_CURRENCY_DATA,
+            Currency::MMK => MMK_CURRENCY_DATA,
+            Currency::MNT => MNT_CURRENCY_DATA,
+            Currency::MOP => MOP_CURRENCY_DATA,
+            Currency::MUR => MUR_CURRENCY_DATA,
+            Currency::MVR => MVR_CURRENCY_DATA,
+            Currency::MWK => MWK_CURRENCY_DATA,
+            Currency::MXN => MXN_CURRENCY_DATA,
+            Currency::MYR => MYR_CURRENCY_DATA,
+            Currency::MZN => MZN_CURRENCY_DATA,
+            Currency::NAD => NAD_CURRENCY_DATA,
+            Currency::NGN => NGN_CURRENCY_DATA,
+            Currency::NIO => NIO_CURRENCY_DATA,
+            Currency::NOK => NOK_CURRENCY_DATA,
+            Currency::NPR => NPR_CURRENCY_DATA,
+            Currency::NZD => NZD_CURRENCY_DATA,
+            Currency::OMR => OMR_CURRENCY_DATA,
+            Currency::PAB => PAB_CURRENCY_DATA,
+            Currency::PEN => PEN_CURRENCY_DATA,
+            Currency::PGK => PGK_CURRENCY_DATA,
+            Currency::PHP => PHP_CURRENCY_DATA,
+            Currency::PKR => PKR_CURRENCY_DATA,
+            Currency::PLN => PLN_CURRENCY_DATA,
+            Currency::PYG => PYG_CURRENCY_DATA,
+            Currency::QAR => QAR_CURRENCY_DATA,
+            Currency::RON => RON_CURRENCY_DATA,
+            Currency::RSD => RSD_CURRENCY_DATA,
+            Currency::RUB => RUB_CURRENCY_DATA,
+            Currency::RWF => RWF_CURRENCY_DATA,
+            Currency::SAR => SAR_CURRENCY_DATA,
+            Currency::SBD => SBD_CURRENCY_DATA,
+            Currency::SCR => SCR_CURRENCY_DATA,
+            Currency::SDG => SDG_CURRENCY_DATA,
+            Currency::SEK => SEK_CURRENCY_DATA,
+            Currency::SGD => SGD_CURRENCY_DATA,
+            Currency::SHP => SHP_CURRENCY_DATA,
+            Currency::SKK => SKK_CURRENCY_DATA,
+            Currency::SLL => SLL_CURRENCY_DATA,
+            Currency::SOS => SOS_CURRENCY_DATA,
+            Currency::SRD => SRD_CURRENCY_DATA,
+            Currency::SSP => SSP_CURRENCY_DATA,
+            Currency::STD => STD_CURRENCY_DATA,
+            Currency::STN => STN_CURRENCY_DATA,
+            Currency::SVC => SVC_CURRENCY_DATA,
+            Currency::SYP => SYP_CURRENCY_DATA,
+            Currency::SZL => SZL_CURRENCY_DATA,
+            Currency::THB => THB_CURRENCY_DATA,
+            Currency::TJS => TJS_CURRENCY_DATA,
+            Currency::TMT => TMT_CURRENCY_DATA,
+            Currency::TND => TND_CURRENCY_DATA,
+            Currency::TOP => TOP_CURRENCY_DATA,
+            Currency::TRY => TRY_CURRENCY_DATA,
+            Currency::TTD => TTD_CURRENCY_DATA,
+            Currency::TWD => TWD_CURRENCY_DATA,
+            Currency::TZS => TZS_CURRENCY_DATA,
+            Currency::UAH => UAH_CURRENCY_DATA,
+            Currency::UGX => UGX_CURRENCY_DATA,
+            Currency::USD => USD_CURRENCY_DATA,
+            Currency::UYU => UYU_CURRENCY_DATA,
+            Currency::UYW => UYW_CURRENCY_DATA,
+            Currency::UZS => UZS_CURRENCY_DATA,
+            Currency::VES => VES_CURRENCY_DATA,
+            Currency::VND => VND_CURRENCY_DATA,
+            Currency::VUV => VUV_CURRENCY_DATA,
+            Currency::WST => WST_CURRENCY_DATA,
+            Currency::XAF => XAF_CURRENCY_DATA,
+            Currency::XAG => XAG_CURRENCY_DATA,
+            Currency::XAU => XAU_CURRENCY_DATA,
+            Currency::XBA => XBA_CURRENCY_DATA,
+            Currency::XBB => XBB_CURRENCY_DATA,
+            Currency::XBC => XBC_CURRENCY_DATA,
+            Currency::XBD => XBD_CURRENCY_DATA,
+            Currency::XCD => XCD_CURRENCY_DATA,
+            Currency::XDR => XDR_CURRENCY_DATA,
+            Currency::XOF => XOF_CURRENCY_DATA,
+            Currency::XPD => XPD_CURRENCY_DATA,
+            Currency::XPF => XPF_CURRENCY_DATA,
+            Currency::XPT => XPT_CURRENCY_DATA,
+            Currency::XTS => XTS_CURRENCY_DATA,
+            Currency::ZAR => ZAR_CURRENCY_DATA,
+            Currency::ZMK => ZMK_CURRENCY_DATA,
+            Currency::ZMW => ZMW_CURRENCY_DATA,
+            Currency::ZWL => ZWL_CURRENCY_DATA,
+            Currency::YER => YER_CURRENCY_DATA,
         }
     }
 
