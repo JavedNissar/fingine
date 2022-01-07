@@ -295,20 +295,6 @@ impl RoundedEq for Money{
     }
 }
 
-#[macro_export]
-macro_rules! cad_money {
-    ($amount: expr) => {
-        Money { amount: dec!($amount), currency: Currency::CAD }
-    };
-}
-
-#[macro_export]
-macro_rules! usd_money {
-    ($amount: expr) => {
-        Money { amount: dec!($amount), currency: Currency::USD }
-    };
-}
-
 pub fn init_cad_money(amount: Decimal) -> Money {
     Money { amount: amount, currency: Currency::CAD }
 }
@@ -349,8 +335,8 @@ mod tests {
 
     #[test]
     fn can_stringify(){
-        let one_usd = usd_money!(1.00);
-        let one_cad = cad_money!(1.00);
+        let one_usd = init_usd_money(dec!(1.00));
+        let one_cad = init_cad_money(dec!(1.00));
 
         assert_eq!(one_usd.to_string(), "US$1.00");
         assert_eq!(one_cad.to_string(), "C$1.00");
@@ -358,8 +344,8 @@ mod tests {
 
     #[test]
     fn can_determine_positivity(){
-        let one_cad = cad_money!(1.00);
-        let zero_cad = cad_money!(0.00);
+        let one_cad = init_cad_money(dec!(1.00));
+        let zero_cad = init_cad_money(dec!(0.00));
 
         assert_eq!(one_cad.is_positive(), true);
         assert_eq!(zero_cad.is_positive(), false);
@@ -367,18 +353,18 @@ mod tests {
 
     #[test]
     fn can_multiply_by_scalar(){
-        let one_cad = cad_money!(1.00);
+        let one_cad = init_cad_money(dec!(1.00));
         let ten_cad = one_cad * 10;
         let zero_cad = one_cad * 0;
 
-        assert_eq!(ten_cad,cad_money!(10));
-        assert_eq!(zero_cad, cad_money!(0));
+        assert_eq!(ten_cad,init_cad_money(dec!(10)));
+        assert_eq!(zero_cad, init_cad_money(dec!(0)));
     }
 
     #[test]
     fn can_compare_same_currencies(){
-        let one = usd_money!(1);
-        let two = usd_money!(2);
+        let one = init_usd_money(dec!(1.00));
+        let two = init_usd_money(dec!(2.00));
 
         assert_eq!(one < two, true);
         assert_eq!(two > one, true);
@@ -390,8 +376,8 @@ mod tests {
     fn can_compare_usd_amount_with_greater_cad_amount(){
         let exchange = setup();
 
-        let usd_money = usd_money!(1);
-        let cad_money = cad_money!(2);
+        let usd_money = init_usd_money(dec!(1.00));
+        let cad_money = init_cad_money(dec!(2.00));
 
         assert_eq!(exchange.lt(usd_money, cad_money).unwrap(), true);
         assert_eq!(exchange.lte(usd_money, cad_money).unwrap(), true);
@@ -410,8 +396,8 @@ mod tests {
     fn can_compare_usd_amount_with_less_cad_amount(){
         let exchange = setup();
 
-        let usd_money = usd_money!(2);
-        let cad_money = cad_money!(1);
+        let usd_money = init_usd_money(dec!(2));
+        let cad_money = init_cad_money(dec!(1));
 
         assert_eq!(exchange.lt(usd_money, cad_money).unwrap(), false);
         assert_eq!(exchange.lte(usd_money, cad_money).unwrap(), false);
@@ -430,8 +416,8 @@ mod tests {
     fn can_compare_usd_amount_with_equal_cad_amount(){
         let exchange = setup();
 
-        let usd_money = usd_money!(1);
-        let cad_money = cad_money!(1.3);
+        let usd_money = init_usd_money(dec!(1));
+        let cad_money = init_cad_money(dec!(1.3));
 
         assert_eq!(exchange.lt(usd_money, cad_money).unwrap(), false);
         assert_eq!(exchange.lte(usd_money, cad_money).unwrap(), true);
@@ -450,14 +436,14 @@ mod tests {
     fn can_clamp_with_value_less_than_range(){
         let exchange = setup();        
 
-        let input = usd_money!(1);
-        let min = cad_money!(2);
-        let max = cad_money!(3);
+        let input = init_usd_money(dec!(1));
+        let min = init_cad_money(dec!(2));
+        let max = init_cad_money(dec!(3));
 
         let clamped_cad = exchange.clamp(input, min, max, Currency::CAD).unwrap();
         let clamped_usd = exchange.clamp(input, min, max, Currency::USD).unwrap();
 
-        let expected_clamped_cad = cad_money!(2);
+        let expected_clamped_cad = init_cad_money(dec!(2));
         let expected_clamped_usd_amount = dec!(2) * dec!(1)/dec!(1.3);
         let expected_clamped_usd = Money { amount: expected_clamped_usd_amount, currency: Currency::USD };
 
@@ -469,14 +455,14 @@ mod tests {
     fn can_clamp_with_value_within_range(){
         let exchange = setup();
 
-        let input = cad_money!(2.5);
-        let min = cad_money!(2);
-        let max = cad_money!(3);
+        let input = init_cad_money(dec!(2.5));
+        let min = init_cad_money(dec!(2));
+        let max = init_cad_money(dec!(3));
 
         let clamped_cad = exchange.clamp(input, min, max, Currency::CAD).unwrap();
         let clamped_usd = exchange.clamp(input, min, max, Currency::USD).unwrap();
 
-        let expected_clamped_cad = cad_money!(2.5);
+        let expected_clamped_cad = init_cad_money(dec!(2.5));
         let expected_usd_amount = dec!(2.5) * (dec!(1)/dec!(1.3));
         let expected_clamped_usd = Money { amount: expected_usd_amount, currency: Currency::USD };
         
@@ -488,15 +474,15 @@ mod tests {
     fn can_clamp_with_value_greater_than_range(){
         let exchange = setup();
 
-        let input = cad_money!(2);
-        let min = usd_money!(0);
-        let max = usd_money!(0.5);
+        let input = init_cad_money(dec!(2));
+        let min = init_usd_money(dec!(0));
+        let max = init_usd_money(dec!(0.5));
 
         let clamped_cad = exchange.clamp(input, min, max, Currency::CAD).unwrap();
         let clamped_usd = exchange.clamp(input, min, max, Currency::USD).unwrap();
 
-        let expected_clamped_cad = cad_money!(0.65);
-        let expected_clamped_usd = usd_money!(0.5);
+        let expected_clamped_cad = init_cad_money(dec!(0.65));
+        let expected_clamped_usd = init_usd_money(dec!(0.5));
 
         assert_rounded_eq!(clamped_cad, expected_clamped_cad);
         assert_rounded_eq!(clamped_usd, expected_clamped_usd);
@@ -506,8 +492,8 @@ mod tests {
     fn can_add_different_currencies_and_get_converted_result(){
         let exchange = setup();
 
-        let first = cad_money!(1); 
-        let second = usd_money!(1);
+        let first = init_cad_money(dec!(1)); 
+        let second = init_usd_money(dec!(1));
         
         let sum_in_cad = exchange.add(first, second, Currency::CAD).unwrap();
         let sum_in_usd = exchange.add(first, second, Currency::USD).unwrap();
@@ -515,7 +501,7 @@ mod tests {
         let sum_without_exchange = first.checked_add(second).unwrap_err();
         assert_eq!(MoneyError::MismatchedCurrencies, sum_without_exchange);
 
-        let expected_cad_sum = cad_money!(2.3);
+        let expected_cad_sum = init_cad_money(dec!(2.3));
         let expected_usd_sum_amount = dec!(1) * dec!(1)/dec!(1.3) + dec!(1);
         let expected_usd_sum = Money { amount: expected_usd_sum_amount, currency: Currency::USD };
 
@@ -527,15 +513,15 @@ mod tests {
     fn can_add_same_currencies_and_get_converted_result(){
         let exchange = setup();
 
-        let first = cad_money!(1);
-        let second = cad_money!(1);
+        let first = init_cad_money(dec!(1));
+        let second = init_cad_money(dec!(1));
 
         let sum_in_cad = exchange.add(first, second, Currency::CAD).unwrap();
         let sum_in_usd = exchange.add(first, second, Currency::USD).unwrap();
         let sum_without_exchange_unchecked = first + second;
         let sum_without_exchange_checked = first.checked_add(second).unwrap();
 
-        let expected_cad_sum = cad_money!(2);
+        let expected_cad_sum = init_cad_money(dec!(2));
         let expected_usd_sum_amount = dec!(1) * dec!(1)/dec!(1.3) * dec!(2);
         let expected_usd_sum = Money { amount: expected_usd_sum_amount, currency: Currency::USD };
         assert_eq!(sum_without_exchange_unchecked, expected_cad_sum);
@@ -549,14 +535,14 @@ mod tests {
     fn can_subtract_different_currencies_and_get_converted_result(){
         let exchange = setup();
 
-        let first = cad_money!(2);
-        let second = usd_money!(1);
+        let first = init_cad_money(dec!(2));
+        let second = init_usd_money(dec!(1));
 
         let diff_in_cad = exchange.sub(first, second, Currency::CAD).unwrap();
         let diff_in_usd = exchange.sub(first, second, Currency::USD).unwrap();
         let diff_without_exchange = first.checked_sub(second).unwrap_err();
 
-        let expected_cad_diff = cad_money!(0.7);
+        let expected_cad_diff = init_cad_money(dec!(0.7));
         let expected_usd_diff_amount = dec!(2) * dec!(1)/dec!(1.3) - dec!(1);
         let expected_usd_diff = Money { amount: expected_usd_diff_amount, currency: Currency::USD };
 
@@ -569,15 +555,15 @@ mod tests {
     fn can_subtract_same_currencies_and_get_converted_result(){
         let exchange = setup();
 
-        let first = cad_money!(2);
-        let second = cad_money!(1);
+        let first = init_cad_money(dec!(2));
+        let second = init_cad_money(dec!(1));
 
         let diff_in_cad = exchange.sub(first, second, Currency::CAD).unwrap();
         let diff_in_usd = exchange.sub(first, second, Currency::USD).unwrap();
         let diff_without_exchange_checked = first.checked_sub(second).unwrap();
         let diff_without_exchange_unchecked = first - second;
 
-        let expected_cad_diff = cad_money!(1);
+        let expected_cad_diff = init_cad_money(dec!(1));
         let expected_usd_diff_amount = dec!(1) * dec!(1)/dec!(1.3);
         let expected_usd_diff = Money { amount: expected_usd_diff_amount, currency: Currency::USD };
 
