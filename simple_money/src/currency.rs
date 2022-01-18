@@ -288,6 +288,14 @@ const CRC_CURRENCY_DATA: CurrencyData = CurrencyData {
     symbol_first: false,
 };
 
+const CUC_CURRENCY_DATA: CurrencyData = CurrencyData{
+    exponent: 2,
+    locale: Locale::USA,
+    minor_units: 1,
+    symbol: "$",
+    symbol_first: false,
+};
+
 const CUP_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
