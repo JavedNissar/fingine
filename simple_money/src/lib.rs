@@ -90,7 +90,7 @@ impl Exchange {
             Ok(first + second)
         }else{
             let first_in_output_currency = self.convert(first, output_currency)?;
-            let second_in_output_currency =self.convert(second, output_currency)?;
+            let second_in_output_currency = self.convert(second, output_currency)?;
             Ok(first_in_output_currency + second_in_output_currency)
         }
     }
