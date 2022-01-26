@@ -1,13 +1,13 @@
 use Lotus::LotusBuilder;
 
-struct CurrencyData {
-    exponent: u8,
-    locale: Locale,
-    symbol: &'static str,
-    symbol_first: bool,
+pub struct CurrencyData {
+    pub exponent: u8,
+    pub locale: Locale,
+    pub symbol: &'static str,
+    pub symbol_first: bool,
 }
 
-enum Locale {
+pub enum Locale {
     USA,
     EU,
     // TODO: Separate digits for India based on Indian numbering system
@@ -550,6 +550,7 @@ const KWD_CURRENCY_DATA: CurrencyData = CurrencyData {
 const KYD_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
+    symbol: "$",
     symbol_first: true,
 };
 
@@ -1380,7 +1381,7 @@ pub enum Currency {
 }
 
 impl Currency {
-    fn match_currency_to_data(&self) -> CurrencyData {
+    pub fn match_currency_to_data(&self) -> CurrencyData {
         match self {
             Currency::AED => AED_CURRENCY_DATA,
             Currency::AFN => AFN_CURRENCY_DATA,
