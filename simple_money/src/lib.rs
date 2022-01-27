@@ -81,7 +81,8 @@ impl Exchange {
         }
 
         let rate = self.get_rate(money.currency, currency)?;
-        let converted_money = Money { amount: money.amount * rate, currency: currency };
+        let decimal = Decimal::new((money.amount * rate).to_i64().unwrap(), currency.match_currency_to_data().exponent.into());
+        let converted_money = Money { amount: decimal, currency: currency };
         return Ok(converted_money);
     }
     
@@ -307,6 +308,10 @@ pub fn init_zero_amount(currency: Currency) -> Money {
     Money { amount: dec!(0), currency: currency }
 }
 
+pub fn init_eur_money(amount: Decimal) -> Money {
+    Money { amount: amount, currency: Currency::EUR }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -337,9 +342,11 @@ mod tests {
     fn can_stringify(){
         let one_usd = init_usd_money(dec!(1.00));
         let one_cad = init_cad_money(dec!(1.00));
+        let one_eur = init_eur_money(dec!(1.00));
 
-        assert_eq!(one_usd.to_string(), "US$1.00");
-        assert_eq!(one_cad.to_string(), "C$1.00");
+        assert_eq!(one_usd.to_string(), "$1.00");
+        assert_eq!(one_cad.to_string(), "$1.00");
+        assert_eq!(one_eur.to_string(), "€1,00");
     }
 
     #[test]
