@@ -344,9 +344,15 @@ mod tests {
         let one_cad = init_cad_money(dec!(1.00));
         let one_eur = init_eur_money(dec!(1.00));
 
+        let one_hundred_thousand_eur = init_eur_money(dec!(100_000.00));
+        let one_hundred_thousand_usd = init_usd_money(dec!(100_000.00));
+
         assert_eq!(one_usd.to_string(), "$1.00");
         assert_eq!(one_cad.to_string(), "$1.00");
         assert_eq!(one_eur.to_string(), "€1,00");
+
+        assert_eq!(one_hundred_thousand_usd.to_string(), "$100,000.00");
+        assert_eq!(one_hundred_thousand_eur.to_string(), "€100.000,00")
     }
 
     #[test]
