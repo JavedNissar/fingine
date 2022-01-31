@@ -487,7 +487,7 @@ const JMD_CURRENCY_DATA: CurrencyData = CurrencyData {
 const JOD_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 3,
     locale: Locale::USA,
-    symbol: "د.ا",
+    symbol: r#"د.ا"#,
     symbol_first: true,
 };
 
@@ -621,7 +621,7 @@ const MDL_CURRENCY_DATA: CurrencyData = CurrencyData {
 const MKD_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
-    symbol: "ден",
+    symbol: r#"ден"#,
     symbol_first: false,
 };
 
@@ -803,7 +803,7 @@ const RON_CURRENCY_DATA: CurrencyData = CurrencyData{
 const RSD_CURRENCY_DATA: CurrencyData = CurrencyData{
     exponent: 2,
     locale: Locale::USA,
-    symbol: "РСД",
+    symbol: r#"РСД"#,
     symbol_first: true,
 };
 
@@ -950,7 +950,7 @@ const THB_CURRENCY_DATA: CurrencyData = CurrencyData{
 const TJS_CURRENCY_DATA: CurrencyData = CurrencyData {
     exponent: 2,
     locale: Locale::USA,
-    symbol: "ЅМ",
+    symbol: r#"ЅМ"#,
     symbol_first: false,
 };
 
